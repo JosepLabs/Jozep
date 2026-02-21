@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koda — Generador QR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,300;10..48,400;10..48,500;10..48,600;10..48,700;10..48,800;10..48,900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
+    <link rel="icon" href="favicon.png">
+    <style>
+        :root {
+            --bg: #f4f3ee;
+            --surface: #ffffff;
+            --surface-2: #f9f8f4;
+            --border: #e0ddd5;
+            --border-hover: #c8c4b8;
+            --nav-bg: #111110;
+            --text: #111110;
+            --text-2: #4a4845;
+            --text-3: #908d86;
+            --accent: #e8431b;
+            --accent-soft: #fff2ee;
+            --accent-border: #ffc5b3;
+            --accent-hover: #cd3a16;
+            --green: #16a34a; --green-soft: #f0fdf4; --green-border: #bbf7d0;
+            --red: #dc2626; --red-soft: #fef2f2; --red-border: #fecaca;
+            --amber: #b45309; --amber-soft: #fffbeb; --amber-border: #fde68a;
+            --cyan: #0e7490; --cyan-soft: #ecfeff; --cyan-border: #a5f3fc;
+            --violet: #5b21b6; --violet-soft: #f5f3ff; --violet-border: #ddd6fe;
+            --rose: #9f1239; --rose-soft: #fff1f2; --rose-border: #fecdd3;
+            --indigo: #3730a3; --indigo-soft: #eef2ff; --indigo-border: #c7d2fe;
+            --radius-sm: 8px; --radius: 12px; --radius-lg: 18px; --radius-xl: 24px;
+            --shadow: 0 1px 3px rgba(0,0,0,.05), 0 6px 20px rgba(0,0,0,.06);
+            --shadow-lg: 0 12px 40px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.05);
+        }
+
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        button { font-family: inherit; cursor: pointer; border: none; }
+        a { text-decoration: none; color: inherit; }
+
+        /* ══ TOPNAV ══ */
+        .topnav {
+            position: sticky; top: 0; z-index: 200;
+            background: var(--nav-bg);
+            border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+        .nav-inner {
+            max-width: 1280px; margin: 0 auto;
+            display: flex; align-items: center; gap: 0;
+            padding: 0 32px; height: 62px;
+        }
+        .nav-brand {
+            display: flex; align-items: center; gap: 10px;
+            flex-shrink: 0; margin-right: 40px;
+        }
+        .nav-logo {
+            width: 32px; height: 32px; border-radius: 8px;
+            object-fit: contain;
+        }
+        .nav-wordmark {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 18px; font-weight: 800; letter-spacing: 3px;
+            background: linear-gradient(110deg, #ffffff 0%, #38bdf8 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .nav-tabs {
+            display: flex; gap: 2px; flex: 1;
+        }
+        .nav-tab {
+            padding: 8px 18px; border-radius: 8px;
+            background: transparent; color: rgba(255,255,255,.4);
+            font-size: 13.5px; font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            transition: background .15s, color .15s;
+            position: relative; white-space: nowrap;
+        }
+        .nav-tab:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.75); }
+        .nav-tab.active { background: rgba(255,255,255,.1); color: #fff; }
+        .trash-pill {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 18px; height: 18px; border-radius: 99px;
+            background: var(--accent); color: #fff;
+            font-size: 10px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+            margin-left: 6px; vertical-align: middle;
+        }
+        .nav-right {
+            margin-left: auto; display: flex; align-items: center; gap: 12px;
+        }
+        .nav-avatar {
+            display: flex; align-items: center; gap: 10px;
+            padding: 5px 5px 5px 10px; border-radius: 99px;
+            background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
+            cursor: pointer; transition: background .15s;
+        }
+        .nav-avatar:hover { background: rgba(255,255,255,.1); }
+        .avatar-name { font-size: 12.5px; color: rgba(255,255,255,.5); font-weight: 500; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .avatar-circle {
+            width: 30px; height: 30px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; color: white; flex-shrink: 0;
+        }
+
+        /* ══ LAYOUT ══ */
+        .page-wrap { max-width: 1280px; margin: 0 auto; padding: 52px 32px 80px; }
+
+        /* ══ SECTIONS ══ */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* ══ PAGE HEADER ══ */
+        .page-hero { margin-bottom: 48px; }
+        .page-kicker {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
+            color: var(--accent); margin-bottom: 12px; display: block;
+        }
+        .page-title {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 38px; font-weight: 800; letter-spacing: -1.5px;
+            color: var(--text); line-height: 1.1;
+        }
+        .page-sub { font-size: 15px; color: var(--text-2); margin-top: 8px; font-weight: 400; max-width: 480px; line-height: 1.6; }
+
+        /* ══ STATS ══ */
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 56px; }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 24px 28px;
+            display: flex; align-items: flex-end; justify-content: space-between;
+            box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s;
+            overflow: hidden; position: relative;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        }
+        .stat-card:nth-child(1)::before { background: var(--accent); }
+        .stat-card:nth-child(2)::before { background: #7c3aed; }
+        .stat-card:nth-child(3)::before { background: #0891b2; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .stat-num {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 52px; font-weight: 900; line-height: 1;
+            color: var(--text); letter-spacing: -2px;
+        }
+        .stat-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-3); margin-top: 4px; }
+        .stat-icon-large {
+            width: 52px; height: 52px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        .stat-card:nth-child(1) .stat-icon-large { background: var(--accent-soft); color: var(--accent); }
+        .stat-card:nth-child(2) .stat-icon-large { background: var(--violet-soft); color: var(--violet); }
+        .stat-card:nth-child(3) .stat-icon-large { background: var(--cyan-soft); color: var(--cyan); }
+
+        /* ══ SECTION LABEL ══ */
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 3px;
+            color: var(--text-3); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+        }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        /* ══ TYPE CARDS ══ */
+        .type-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 56px; }
+        .type-card {
+            background: var(--surface); border: 1.5px solid var(--border);
+            border-radius: var(--radius-lg); padding: 24px 22px 20px;
+            cursor: pointer; display: flex; flex-direction: column; gap: 0;
+            transition: all .22s cubic-bezier(.25,.8,.25,1);
+            position: relative; overflow: hidden; box-shadow: var(--shadow);
+        }
+        .type-card::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 0;
+            background: var(--card-accent, var(--accent));
+            opacity: .07; transition: height .25s;
+        }
+        .type-card:hover {
+            border-color: var(--card-accent, var(--accent));
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0,0,0,.1), 0 4px 12px rgba(0,0,0,.06);
+        }
+        .type-card:hover::after { height: 100%; }
+        .type-card:active { transform: translateY(-1px); }
+        .card-icon-wrap {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 16px; flex-shrink: 0;
+            background: color-mix(in srgb, var(--card-accent, var(--accent)) 10%, transparent);
+            transition: background .2s;
+        }
+        .type-card:hover .card-icon-wrap {
+            background: color-mix(in srgb, var(--card-accent, var(--accent)) 16%, transparent);
+        }
+        .card-icon-wrap svg { width: 22px; height: 22px; }
+        .card-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--card-accent, var(--accent)); margin-bottom: 6px; opacity: .8;
+        }
+        .card-name { font-family: 'Bricolage Grotesque', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 7px; line-height: 1.2; }
+        .card-desc { font-size: 12px; color: var(--text-2); line-height: 1.6; flex: 1; }
+        .card-arrow {
+            display: flex; align-items: center; gap: 6px; margin-top: 16px;
+            font-size: 12px; font-weight: 600; color: var(--card-accent, var(--accent));
+            opacity: 0; transform: translateX(-6px); transition: opacity .2s, transform .2s;
+        }
+        .type-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+        .card-arrow svg { width: 12px; height: 12px; }
+
+        /* ══ QR LIST ══ */
+        .qr-list {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .qr-list-header {
+            display: grid; grid-template-columns: 52px 1fr 100px 120px 80px;
+            gap: 12px; padding: 10px 20px;
+            background: var(--surface-2); border-bottom: 1px solid var(--border);
+        }
+        .list-col-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-3); }
+        .qr-item {
+            display: grid; grid-template-columns: 52px 1fr 100px 120px 80px;
+            gap: 12px; align-items: center;
+            padding: 12px 20px; border-bottom: 1px solid var(--border);
+            cursor: pointer; transition: background .12s; position: relative;
+        }
+        .qr-item:last-child { border-bottom: none; }
+        .qr-item:hover { background: var(--surface-2); }
+        .qr-item:hover .qr-row-actions { opacity: 1; pointer-events: all; }
+        .qr-thumb {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: white; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            padding: 3px; flex-shrink: 0; overflow: hidden;
+        }
+        .qr-thumb canvas { width: 38px !important; height: 38px !important; }
+        .qr-name { font-size: 13.5px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .qr-content-preview { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-3); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .type-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 600;
+            padding: 3px 8px; border-radius: 5px; letter-spacing: .5px; display: inline-block;
+        }
+        .type-tag.url    { background: var(--cyan-soft);   color: var(--cyan);   border: 1px solid var(--cyan-border); }
+        .type-tag.text   { background: var(--violet-soft); color: var(--violet); border: 1px solid var(--violet-border); }
+        .type-tag.wifi   { background: var(--amber-soft);  color: var(--amber);  border: 1px solid var(--amber-border); }
+        .type-tag.vcard  { background: var(--green-soft);  color: var(--green);  border: 1px solid var(--green-border); }
+        .type-tag.email  { background: var(--rose-soft);   color: var(--rose);   border: 1px solid var(--rose-border); }
+        .type-tag.custom { background: var(--violet-soft); color: var(--violet); border: 1px solid var(--violet-border); }
+        .type-tag.crypto { background: var(--amber-soft);  color: var(--amber);  border: 1px solid var(--amber-border); }
+        .type-tag.paypal { background: #e0f7fa;            color: #006064;       border: 1px solid #80deea; }
+        .type-tag.totp   { background: var(--indigo-soft); color: var(--indigo); border: 1px solid var(--indigo-border); }
+        .type-tag.event  { background: var(--green-soft);  color: var(--green);  border: 1px solid var(--green-border); }
+        .type-tag.medical{ background: var(--rose-soft);   color: var(--rose);   border: 1px solid var(--rose-border); }
+        .qr-date { font-size: 12px; color: var(--text-3); }
+        .qr-row-actions {
+            display: flex; gap: 5px; justify-content: flex-end;
+            opacity: 0; pointer-events: none; transition: opacity .15s;
+        }
+        .action-btn {
+            width: 30px; height: 30px; border-radius: 8px;
+            background: var(--surface); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-2); transition: all .12s; cursor: pointer;
+        }
+        .action-btn svg { width: 13px; height: 13px; }
+        .action-btn:hover { background: var(--surface-2); border-color: var(--border-hover); color: var(--text); }
+        .action-btn.danger:hover { background: var(--red-soft); border-color: var(--red-border); color: var(--red); }
+
+        /* ══ EMPTY STATE ══ */
+        .empty-state {
+            padding: 72px 32px; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 0;
+        }
+        .empty-ring {
+            width: 72px; height: 72px; border-radius: 50%;
+            border: 2px dashed var(--border-hover);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px; color: var(--text-3);
+        }
+        .empty-ring svg { width: 28px; height: 28px; }
+        .empty-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 17px; font-weight: 700; color: var(--text-2); margin-bottom: 8px; }
+        .empty-desc { font-size: 13.5px; color: var(--text-3); line-height: 1.65; }
+
+        /* ══ TRASH ══ */
+        .trash-banner {
+            display: flex; align-items: flex-start; gap: 12px;
+            background: var(--amber-soft); border: 1px solid var(--amber-border);
+            border-radius: var(--radius); padding: 14px 18px;
+            margin-bottom: 24px; font-size: 13px; color: #78350f; line-height: 1.6;
+        }
+        .trash-banner svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; color: var(--amber); }
+        .trash-row {
+            display: grid; grid-template-columns: 52px 1fr auto;
+            gap: 16px; align-items: center;
+            padding: 14px 20px; border-bottom: 1px solid var(--border);
+        }
+        .trash-row:last-child { border-bottom: none; }
+        .trash-name { font-size: 13.5px; font-weight: 600; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .trash-meta { display: flex; align-items: center; gap: 10px; margin-top: 3px; }
+        .expires-tag { font-size: 11.5px; font-weight: 600; color: var(--text-3); }
+        .expires-tag.soon   { color: var(--amber); }
+        .expires-tag.urgent { color: var(--red); }
+        .trash-acts { display: flex; gap: 8px; flex-shrink: 0; }
+        .btn-restore {
+            height: 32px; display: flex; align-items: center; gap: 6px;
+            padding: 0 14px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--surface); font-size: 12px; font-weight: 600;
+            color: var(--text-2); transition: all .12s;
+        }
+        .btn-restore svg { width: 11px; height: 11px; }
+        .btn-restore:hover { background: var(--green-soft); border-color: var(--green-border); color: var(--green); }
+        .btn-del-perm {
+            height: 32px; display: flex; align-items: center; gap: 6px;
+            padding: 0 14px; border-radius: 8px; border: 1px solid var(--red-border);
+            background: var(--red-soft); color: var(--red); font-size: 12px; font-weight: 600;
+            transition: all .12s;
+        }
+        .btn-del-perm svg { width: 11px; height: 11px; }
+        .btn-del-perm:hover { background: var(--red); border-color: var(--red); color: white; }
+
+        /* ══ SETTINGS ══ */
+        .settings-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 520px; }
+        .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+        .settings-section { padding: 24px 28px; border-bottom: 1px solid var(--border); }
+        .settings-section:last-child { border-bottom: none; }
+        .settings-sec-title { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; color: var(--text-3); margin-bottom: 20px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-label { display: block; font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+        .form-input {
+            width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm); font-family: 'DM Sans', inherit;
+            font-size: 14px; color: var(--text); background: var(--surface);
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .form-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,67,27,.1); }
+        .form-hint { font-size: 12px; color: var(--text-3); margin-top: 6px; line-height: 1.55; }
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .toggle-row-info { flex: 1; }
+        .toggle {
+            width: 40px; height: 23px; background: var(--border-hover);
+            border-radius: 99px; position: relative; cursor: pointer;
+            flex-shrink: 0; transition: background .2s; border: none;
+        }
+        .toggle.on { background: var(--accent); }
+        .toggle::after {
+            content: ''; position: absolute;
+            width: 18px; height: 18px; border-radius: 50%; background: white;
+            top: 2.5px; left: 2.5px; transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+            box-shadow: 0 1px 4px rgba(0,0,0,.2);
+        }
+        .toggle.on::after { transform: translateX(17px); }
+        .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all .15s; }
+        .btn svg { width: 13px; height: 13px; }
+        .btn-danger-soft { background: var(--red-soft); color: var(--red); border: 1.5px solid var(--red-border); }
+        .btn-danger-soft:hover { background: var(--red); color: white; border-color: var(--red); }
+        .storage-bar-wrap { margin-top: 14px; }
+        .storage-bar-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-3); margin-bottom: 8px; font-weight: 500; }
+        .storage-bar-track { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+        .storage-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #7c3aed); border-radius: 99px; transition: width .5s ease; }
+
+        /* ══ MODAL ══ */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.4);
+            backdrop-filter: blur(4px); z-index: 900;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity .2s;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: all; }
+        .modal {
+            background: var(--surface); border-radius: var(--radius-xl);
+            padding: 32px 32px 28px; max-width: 400px; width: 90%;
+            box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
+            transform: scale(.95) translateY(12px); transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+        }
+        .modal-overlay.show .modal { transform: scale(1) translateY(0); }
+        .modal-icon-wrap {
+            width: 44px; height: 44px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--red-soft); margin-bottom: 18px;
+        }
+        .modal-icon-wrap svg { width: 22px; height: 22px; color: var(--red); }
+        .modal-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+        .modal-desc  { font-size: 13.5px; color: var(--text-2); line-height: 1.65; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+        .btn-ghost  { background: var(--surface-2); color: var(--text-2); border: 1.5px solid var(--border); }
+        .btn-ghost:hover { background: var(--border); color: var(--text); }
+        .btn-danger { background: var(--red); color: white; border: none; }
+        .btn-danger:hover { background: #b91c1c; }
+
+        /* ══ TOAST ══ */
+        .toast {
+            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(16px);
+            background: var(--text); color: white; padding: 12px 22px;
+            border-radius: 12px; font-size: 13.5px; font-weight: 500;
+            opacity: 0; transition: opacity .22s, transform .22s;
+            pointer-events: none; z-index: 1000; white-space: nowrap;
+            box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+        /* ══ RESPONSIVE ══ */
+        @media (max-width: 1024px) { .type-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) {
+            .nav-inner { padding: 0 16px; }
+            .page-wrap { padding: 32px 16px 60px; }
+            .type-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-row { grid-template-columns: 1fr; }
+            .page-title { font-size: 28px; }
+            .qr-list-header { display: none; }
+            .qr-item { grid-template-columns: 44px 1fr auto; }
+            .qr-date, .qr-item > .type-tag { display: none; }
+            .qr-row-actions { opacity: 1; pointer-events: all; }
+            .avatar-name { display: none; }
+        }
+        @media (max-width: 480px) {
+            .type-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="topnav">
+    <div class="nav-inner">
+        <div class="nav-brand">
+            <img src="logo.png" alt="Koda logo" class="nav-logo" onerror="this.style.display='none'">
+            <span class="nav-wordmark">KODA</span>
+        </div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-section="home">Inicio</button>
+            <button class="nav-tab" data-section="saved">Mis Códigos</button>
+            <button class="nav-tab" data-section="trash">
+                Papelera
+                <span class="trash-pill" id="trashBadge" style="display:none">0</span>
+            </button>
+            <button class="nav-tab" data-section="settings">Ajustes</button>
+        </div>
+        <div class="nav-right">
+            <div class="nav-avatar">
+                <div class="avatar-name" id="avatarName">Sin nombre</div>
+                <div class="avatar-circle" id="avatarInitial">?</div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="page-wrap">
+
+    <!-- ══ HOME ══ -->
+    <section id="section-home" class="section active">
+        <div class="page-hero">
+            <span class="page-kicker">Generador QR</span>
+            <h1 class="page-title" id="greetingTitle">Bienvenido a KODA</h1>
+            <p class="page-sub">Crea, personaliza y descarga códigos QR profesionales en segundos.</p>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-num" id="statTotal">0</div>
+                    <div class="stat-label">Códigos guardados</div>
+                </div>
+                <div class="stat-icon-large">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7M17 14v7"/></svg>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-num" id="statRecent">0</div>
+                    <div class="stat-label">Creados este mes</div>
+                </div>
+                <div class="stat-icon-large">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l3.5 3.5"/></svg>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-num" id="statTypes">0</div>
+                    <div class="stat-label">Tipos distintos</div>
+                </div>
+                <div class="stat-icon-large">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-label">Crear nuevo código QR</div>
+        <div class="type-grid" id="homeTypeCards"></div>
+
+        <div class="section-label">Recientes</div>
+        <div class="qr-list" id="homeRecents">
+            <div class="qr-list-header">
+                <div></div>
+                <span class="list-col-label">Nombre</span>
+                <span class="list-col-label">Tipo</span>
+                <span class="list-col-label">Fecha</span>
+                <span class="list-col-label"></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ MIS CÓDIGOS ══ -->
+    <section id="section-saved" class="section">
+        <div class="page-hero">
+            <span class="page-kicker">Biblioteca</span>
+            <h1 class="page-title">Mis Códigos</h1>
+            <p class="page-sub">Todos tus códigos QR guardados localmente en este dispositivo.</p>
+        </div>
+        <div class="qr-list" id="savedList">
+            <div class="qr-list-header">
+                <div></div>
+                <span class="list-col-label">Nombre</span>
+                <span class="list-col-label">Tipo</span>
+                <span class="list-col-label">Fecha</span>
+                <span class="list-col-label"></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ PAPELERA ══ -->
+    <section id="section-trash" class="section">
+        <div class="page-hero">
+            <span class="page-kicker">Eliminados</span>
+            <h1 class="page-title">Papelera</h1>
+            <p class="page-sub">Los códigos eliminados se borran definitivamente pasados 7 días.</p>
+        </div>
+        <div class="trash-banner">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="7"/><path d="M8 5v4M8 11v.5"/></svg>
+            Los códigos en la papelera se eliminan permanentemente 7 días después de haberse borrado. Puedes restaurarlos o eliminarlos antes de que expire el plazo.
+        </div>
+        <div class="qr-list" id="trashList"></div>
+    </section>
+
+    <!-- ══ AJUSTES ══ -->
+    <section id="section-settings" class="section">
+        <div class="page-hero">
+            <span class="page-kicker">Configuración</span>
+            <h1 class="page-title">Ajustes</h1>
+            <p class="page-sub">Personaliza tu experiencia con KODA.</p>
+        </div>
+        <div class="settings-grid">
+            <div class="settings-card">
+                <div class="settings-section">
+                    <div class="settings-sec-title">Perfil</div>
+                    <div class="form-group">
+                        <label class="form-label" for="userNameInput">Tu nombre</label>
+                        <input type="text" class="form-input" id="userNameInput" placeholder="Escribe tu nombre..." autocomplete="off">
+                        <div class="form-hint">Se usa para personalizar el saludo en el inicio.</div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <div class="settings-sec-title">Almacenamiento</div>
+                    <div class="form-group">
+                        <div class="toggle-row">
+                            <div class="toggle-row-info">
+                                <label class="form-label" style="margin-bottom:3px;">Limpieza automática cada 30 días</label>
+                                <div class="form-hint" style="margin-top:0;">Los códigos sin editar se mueven a la papelera al abrir la app.</div>
+                            </div>
+                            <button class="toggle" id="autoCleanToggle"></button>
+                        </div>
+                    </div>
+                    <div class="storage-bar-wrap">
+                        <div class="storage-bar-row">
+                            <span>Códigos guardados</span>
+                            <span id="storageCount">0 / 100</span>
+                        </div>
+                        <div class="storage-bar-track">
+                            <div class="storage-bar-fill" id="storageBarFill" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <div class="settings-sec-title">Zona de peligro</div>
+                    <div class="form-group">
+                        <label class="form-label">Borrar todos los códigos</label>
+                        <div class="form-hint" style="margin-bottom:14px;">Mueve todos los códigos a la papelera. Tendrás 7 días para recuperarlos.</div>
+                        <button class="btn btn-danger-soft" onclick="confirmMoveAllToTrash()">
+                            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3 13,3"/><path d="M11.5 3v9a1 1 0 01-1 1H3.5a1 1 0 01-1-1V3M4.5 3V2a1 1 0 011-1h3a1 1 0 011 1v1"/></svg>
+                            Mover todo a la papelera
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="toast" id="toast" role="status">
+    <span class="toast-dot"></span>
+    <span id="toastMsg"></span>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
+    <div class="modal">
+        <div class="modal-icon-wrap">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L17.5 17H2.5L10 3z"/><path d="M10 9v4M10 14.5v.5"/></svg>
+        </div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-desc"  id="modalDesc"></div>
+        <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-danger" id="modalConfirmBtn">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const QR_TYPES = [
+    { id:'custom', label:'Personalizado',   badge:'CUSTOM', color:'#7c3aed',
+      desc:'Define libremente el contenido y personaliza al máximo el aspecto del QR.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="4"/><path d="M11 3v2M11 17v2M3 11H1M21 11h-2M5.64 5.64l-1.41-1.41M17.77 17.77l-1.41-1.41M17.77 5.64l1.41-1.41M4.23 17.77L2.82 16.36"/></svg>` },
+    { id:'url',    label:'URL / Enlace',    badge:'URL',    color:'#0891b2',
+      desc:'Dirige a una página web, app o cualquier dirección de internet.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="9"/><path d="M11 2c0 0-4 4-4 9s4 9 4 9M11 2c0 0 4 4 4 9s-4 9-4 9M2 11h18"/></svg>` },
+    { id:'text',   label:'Texto Libre',     badge:'TEXTO',  color:'#6d28d9',
+      desc:'Codifica cualquier texto plano, nota, mensaje o información.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="16" height="16" rx="3"/><path d="M7 8h8M7 12h8M7 16h5"/></svg>` },
+    { id:'wifi',   label:'Red WiFi',        badge:'WIFI',   color:'#b45309',
+      desc:'Conecta dispositivos automáticamente a una red WiFi al escanear.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9c5-5 13-5 18 0"/><path d="M5 12c3.3-3.3 9-3.3 12 0"/><path d="M8 15.5c1.7-1.7 4.3-1.7 6 0"/><circle cx="11" cy="18.5" r="1" fill="currentColor"/></svg>` },
+    { id:'vcard',  label:'Contacto vCard',  badge:'VCARD',  color:'#047857',
+      desc:'Comparte tu tarjeta de contacto: nombre, teléfono, email y más.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="12" r="2.5"/><path d="M14 9h4M14 13h4M14 17h2"/></svg>` },
+    { id:'email',  label:'Correo Email',    badge:'EMAIL',  color:'#be123c',
+      desc:'Abre el cliente de correo con destinatario y asunto prellenado.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="18" height="14" rx="3"/><path d="M2 8l9 6 9-6"/></svg>` },
+    { id:'crypto', label:'Criptomoneda',    badge:'CRYPTO', color:'#92400e',
+      desc:'Bitcoin, Ethereum u otras criptomonedas. QR de pago directo.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="9"/><path d="M8.5 7h4a2 2 0 010 4h-4m0 0h5a2 2 0 010 4h-5M8.5 7v-2m0 13v-2m3-15v2m0 13v2"/></svg>` },
+    { id:'paypal', label:'Pago PayPal',     badge:'PAYPAL', color:'#0284c7',
+      desc:'Enlace directo a tu perfil PayPal.me para recibir pagos al instante.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5h7a5 5 0 010 10H7L5 5z"/><path d="M8 11h7a4.5 4.5 0 010 9H9L7 11"/></svg>` },
+    { id:'totp',   label:'Auth 2FA / TOTP', badge:'2FA',    color:'#4338ca',
+      desc:'Código TOTP para Google Authenticator, Authy u otras apps 2FA.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="8" height="20" rx="2"/><circle cx="11" cy="14" r="3"/><path d="M9.5 7h3"/><circle cx="11" cy="14" r="1" fill="currentColor"/></svg>` },
+    { id:'event',  label:'Evento / Cita',   badge:'EVENT',  color:'#15803d',
+      desc:'Agenda un evento directamente en Google Calendar, Apple Calendar, etc.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="16" height="16" rx="2"/><path d="M3 9h16M8 2v4M14 2v4M8 14l2 2 4-5"/></svg>` },
+    { id:'medical',label:'ID Médico / SOS', badge:'SOS',    color:'#be123c',
+      desc:'Tarjeta de emergencia con grupo sanguíneo, alergias y contacto ICE.',
+      icon:`<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="16" height="16" rx="3"/><path d="M11 7v8M7 11h8"/></svg>` },
+];
+
+const TRASH_TTL    = 7  * 24 * 60 * 60 * 1000;
+const INACTIVE_TTL = 30 * 24 * 60 * 60 * 1000;
+
+const getProjects  = () => { try { return JSON.parse(localStorage.getItem('koda_projects') || '[]'); } catch { return []; } };
+const saveProjects = l  => localStorage.setItem('koda_projects', JSON.stringify(l.slice(0, 100)));
+const getTrash     = () => { try { return JSON.parse(localStorage.getItem('koda_trash')    || '[]'); } catch { return []; } };
+const saveTrash    = l  => localStorage.setItem('koda_trash', JSON.stringify(l));
+const getAutoClean = () => localStorage.getItem('koda_autoclean') !== 'off';
+const setAutoClean = v  => localStorage.setItem('koda_autoclean', v ? 'on' : 'off');
+const getUserName  = () => localStorage.getItem('koda_username') || '';
+const setUserName  = v  => localStorage.setItem('koda_username', v.trim());
+
+function startup() {
+    const now = Date.now();
+    const validTrash = getTrash().filter(p => (now - (p.deletedAt || 0)) < TRASH_TTL);
+    saveTrash(validTrash);
+    if (getAutoClean()) {
+        const projects = getProjects();
+        const active = [], moved = [];
+        projects.forEach(p => { ((now - (p.lastModified || p.createdAt || now)) >= INACTIVE_TTL ? moved : active).push(p); });
+        if (moved.length) {
+            saveProjects(active);
+            saveTrash([...getTrash(), ...moved.map(p => ({ ...p, deletedAt: now }))]);
+            showToast(`${moved.length} código(s) inactivo(s) movido(s) a la papelera`);
+        }
+    }
+}
+
+function showSection(id) {
+    document.querySelectorAll('.section').forEach(s  => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(n => n.classList.remove('active'));
+    document.getElementById('section-' + id).classList.add('active');
+    document.querySelector(`.nav-tab[data-section="${id}"]`)?.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    renderAll();
+}
+
+document.querySelectorAll('.nav-tab[data-section]').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
+
+function formatDate(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts), now = new Date();
+    const dd = Math.floor((now - d) / 86400000);
+    if (dd === 0) return 'Hoy'; if (dd === 1) return 'Ayer'; if (dd < 7) return `Hace ${dd} días`;
+    return d.toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatExpiry(deletedAt) {
+    const rem = TRASH_TTL - (Date.now() - (deletedAt || 0));
+    if (rem <= 0) return { text: 'Expirado', cls: 'urgent' };
+    const h = Math.ceil(rem / 3600000), d = Math.floor(rem / 86400000);
+    if (h <= 24) return { text: `Expira en ${h}h`, cls: 'urgent' };
+    if (d <= 2)  return { text: `Expira en ${d} día${d !== 1 ? 's' : ''}`, cls: 'soon' };
+    return { text: `Expira en ${d} días`, cls: '' };
+}
+
+function getTypeInfo(id) { return QR_TYPES.find(t => t.id === id) || QR_TYPES[0]; }
+
+function getContentPreview(p) {
+    const c = p.content || {};
+    if (p.type === 'url')     return c.url || '';
+    if (p.type === 'text')    return c.text || '';
+    if (p.type === 'wifi')    return c.ssid || '';
+    if (p.type === 'vcard')   return c.name || '';
+    if (p.type === 'email')   return c.email || '';
+    if (p.type === 'crypto')  return c.address || '';
+    if (p.type === 'paypal')  return c.username ? `paypal.me/${c.username}` : '';
+    if (p.type === 'totp')    return c.account || '';
+    if (p.type === 'event')   return c.title || '';
+    if (p.type === 'medical') return c.name || '';
+    return c.data || '';
+}
+
+function buildQRData(p) {
+    const c = p.content || {};
+    switch (p.type) {
+        case 'url':    return c.url || 'https://koda.app';
+        case 'text':   return c.text || 'KODA';
+        case 'wifi':   return `WIFI:T:${c.encryption || 'WPA'};S:${c.ssid || ''};P:${c.password || ''};;`;
+        case 'vcard':  return `BEGIN:VCARD\nVERSION:3.0\nFN:${c.name||''}\nTEL:${c.phone||''}\nEMAIL:${c.email||''}\nORG:${c.org||''}\nURL:${c.url||''}\nEND:VCARD`;
+        case 'email':  return `mailto:${c.email||''}?subject=${encodeURIComponent(c.subject||'')}&body=${encodeURIComponent(c.body||'')}`;
+        case 'crypto': { const coin=(c.coin||'bitcoin').toLowerCase(),addr=c.address||'',amt=c.amount?`?amount=${c.amount}`:''; return coin==='ethereum'?`ethereum:${addr}${c.amount?`?value=${c.amount}`:''}`:`${coin}:${addr}${amt}`; }
+        case 'paypal':  return `https://paypal.me/${c.username||''}${c.amount?`/${c.amount}`:''}`;
+        case 'totp':    return `otpauth://totp/${encodeURIComponent(c.issuer||'Koda')}:${encodeURIComponent(c.account||'')}?secret=${c.secret||''}&issuer=${encodeURIComponent(c.issuer||'Koda')}&algorithm=SHA1&digits=6&period=30`;
+        case 'event': { const fmt=d=>d?d.replace(/[-:]/g,'').replace('T','T').substring(0,15):''; return `BEGIN:VEVENT\nSUMMARY:${c.title||''}\nDTSTART:${fmt(c.start)}\nDTEND:${fmt(c.end)}\nLOCATION:${c.location||''}\nDESCRIPTION:${c.description||''}\nEND:VEVENT`; }
+        case 'medical': return `BEGIN:VCARD\nVERSION:3.0\nFN:${c.name||''}\nTEL;TYPE=CELL:${c.phone||''}\nX-BLOODTYPE:${c.blood||''}\nX-ALLERGIES:${c.allergies||''}\nNOTE:ICE: ${c.ice_name||''} ${c.ice_phone||''}\nEND:VCARD`;
+        default:        return c.data || 'KODA';
+    }
+}
+
+function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+function renderMiniQR(container, data, fgColor, bgColor) {
+    if (!data || typeof QRCodeStyling === 'undefined') return;
+    container.innerHTML = '';
+    try {
+        new QRCodeStyling({ width:38, height:38, type:'canvas', data, dotsOptions:{ color: fgColor||'#000', type:'square' }, backgroundOptions:{ color: bgColor||'#fff' }, qrOptions:{ errorCorrectionLevel:'M' } }).append(container);
+    } catch(e) {}
+}
+
+function renderTypeCards(containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = QR_TYPES.map(t => `
+        <div class="type-card" onclick="launchType('${t.id}')" role="button" tabindex="0"
+             onkeydown="if(event.key==='Enter')launchType('${t.id}')"
+             style="--card-accent:${t.color}">
+            <div class="card-icon-wrap" style="color:${t.color}">${t.icon}</div>
+            <div class="card-badge">${t.badge}</div>
+            <div class="card-name">${t.label}</div>
+            <div class="card-desc">${t.desc}</div>
+            <div class="card-arrow">
+                Crear
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+            </div>
+        </div>`).join('');
+}
+
+function launchType(typeId) {
+    localStorage.setItem('koda_launch', JSON.stringify({ type:'template', config:{ qrType: typeId } }));
+    window.location.href = 'editor.html';
+}
+
+function renderQrList(containerId, limit) {
+    const listEl = document.getElementById(containerId);
+    if (!listEl) return;
+
+    // Keep the header if present
+    const existingHeader = listEl.querySelector('.qr-list-header');
+
+    const list = getProjects();
+    const items = limit ? list.slice(0, limit) : list;
+
+    if (!items.length) {
+        const headerHTML = existingHeader ? existingHeader.outerHTML : '';
+        listEl.innerHTML = headerHTML + `
+        <div class="empty-state">
+            <div class="empty-ring">
+                <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><rect x="17" y="2" width="9" height="9" rx="1.5"/><rect x="2" y="17" width="9" height="9" rx="1.5"/><path d="M17 20h4M19 17v4"/></svg>
+            </div>
+            <div class="empty-title">Sin códigos guardados</div>
+            <div class="empty-desc">Crea tu primer código QR eligiendo<br>un tipo de contenido arriba.</div>
+        </div>`;
+        return;
+    }
+
+    const itemsHTML = items.map(p => {
+        const id = p._id, typeId = p.type || 'custom';
+        return `
+        <div class="qr-item" onclick="openProject('${id}')" data-id="${id}">
+            <div class="qr-thumb"><div id="qth-${id}"></div></div>
+            <div>
+                <div class="qr-name">${escapeHtml(p.name || 'Sin nombre')}</div>
+                <div class="qr-content-preview">${escapeHtml(getContentPreview(p))}</div>
+            </div>
+            <div><span class="type-tag ${typeId}">${getTypeInfo(typeId).badge}</span></div>
+            <div class="qr-date">${formatDate(p.lastModified || p.createdAt)}</div>
+            <div class="qr-row-actions">
+                <button class="action-btn" title="Editar" onclick="event.stopPropagation();openProject('${id}')">
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5L11.5 4.5L5 11H3V9L9.5 2.5z"/><path d="M8 4l2 2"/></svg>
+                </button>
+                <button class="action-btn danger" title="Eliminar" onclick="event.stopPropagation();moveToTrash('${id}')">
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3 13,3"/><path d="M11 3v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3M4.5 3V2a1 1 0 011-1h3a1 1 0 011 1v1"/></svg>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+
+    const headerHTML = existingHeader ? existingHeader.outerHTML : '';
+    listEl.innerHTML = headerHTML + itemsHTML;
+
+    items.forEach(p => {
+        const el = document.getElementById('qth-' + p._id);
+        if (el) renderMiniQR(el, buildQRData(p), p.style?.fgColor, p.style?.bgColor);
+    });
+}
+
+function renderTrash() {
+    const el = document.getElementById('trashList');
+    const list = getTrash();
+    const badge = document.getElementById('trashBadge');
+    badge.style.display = list.length ? '' : 'none';
+    badge.textContent   = list.length;
+    if (!el) return;
+    if (!list.length) {
+        el.innerHTML = `<div class="empty-state">
+            <div class="empty-ring">
+                <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,6 25,6"/><path d="M22 6V24a1.5 1.5 0 01-1.5 1.5H7.5A1.5 1.5 0 016 24V6M10 6V4a1.5 1.5 0 011.5-1.5h5A1.5 1.5 0 0118 4v2"/></svg>
+            </div>
+            <div class="empty-title">La papelera está vacía</div>
+            <div class="empty-desc">Los códigos que elimines aparecerán aquí<br>durante 7 días antes de borrarse definitivamente.</div>
+        </div>`; return;
+    }
+    el.innerHTML = list.map(p => {
+        const expiry = formatExpiry(p.deletedAt), id = p._id, typeId = p.type || 'custom';
+        return `
+        <div class="trash-row" data-id="${id}">
+            <div class="qr-thumb"><div id="tth-${id}"></div></div>
+            <div>
+                <div class="trash-name">${escapeHtml(p.name || 'Sin nombre')}</div>
+                <div class="trash-meta">
+                    <span class="type-tag ${typeId}">${getTypeInfo(typeId).badge}</span>
+                    <span class="expires-tag ${expiry.cls}">${expiry.text}</span>
+                </div>
+            </div>
+            <div class="trash-acts">
+                <button class="btn-restore" onclick="restoreFromTrash('${id}')">
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 7A5.5 5.5 0 1 0 3 3.5"/><polyline points="1.5,1 1.5,4.5 5,4.5"/></svg>
+                    Restaurar
+                </button>
+                <button class="btn-del-perm" onclick="confirmPermDelete('${id}')">
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,3 13,3"/><path d="M11 3v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3M4.5 3V2a1 1 0 011-1h3a1 1 0 011 1v1"/></svg>
+                    Eliminar
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+    list.forEach(p => { const el = document.getElementById('tth-' + p._id); if (el) renderMiniQR(el, buildQRData(p), p.style?.fgColor, p.style?.bgColor); });
+}
+
+function openProject(id) {
+    const p = getProjects().find(x => x._id === id);
+    if (!p) { showToast('Código no encontrado'); return; }
+    localStorage.setItem('koda_launch', JSON.stringify({ type:'project', data: p }));
+    window.location.href = 'editor.html';
+}
+
+function moveToTrash(id) {
+    const list = getProjects(), idx = list.findIndex(p => p._id === id);
+    if (idx === -1) return;
+    const [p] = list.splice(idx, 1);
+    saveProjects(list); saveTrash([{ ...p, deletedAt: Date.now() }, ...getTrash()]);
+    renderAll(); showToast(`"${p.name || 'Sin nombre'}" movido a la papelera`);
+}
+
+function restoreFromTrash(id) {
+    const trash = getTrash(), idx = trash.findIndex(p => p._id === id);
+    if (idx === -1) return;
+    const [p] = trash.splice(idx, 1);
+    saveTrash(trash);
+    const { deletedAt, ...clean } = p;
+    clean.lastModified = Date.now();
+    saveProjects([clean, ...getProjects()]); renderAll();
+    showToast(`"${clean.name || 'Sin nombre'}" restaurado`);
+}
+
+function confirmPermDelete(id) {
+    const p = getTrash().find(x => x._id === id);
+    if (!p) return;
+    openModal('Eliminar definitivamente', `"${p.name || 'Sin nombre'}" se eliminará para siempre y no podrá recuperarse.`, () => {
+        saveTrash(getTrash().filter(x => x._id !== id)); renderAll(); showToast('Código eliminado permanentemente');
+    });
+}
+
+let _nameDebounce;
+document.getElementById('userNameInput').addEventListener('input', function() {
+    clearTimeout(_nameDebounce);
+    _nameDebounce = setTimeout(() => { setUserName(this.value); updateGreeting(); updateAvatarUI(); }, 400);
+});
+
+function updateGreeting() {
+    const name = getUserName(), h = new Date().getHours();
+    let greet = 'Bienvenido a KODA';
+    if (name) { greet = h < 12 ? `Buenos días, ${name}` : h < 19 ? `Buenas tardes, ${name}` : `Buenas noches, ${name}`; }
+    const el = document.getElementById('greetingTitle');
+    if (el) el.textContent = greet;
+    const inp = document.getElementById('userNameInput');
+    if (inp && inp !== document.activeElement) inp.value = getUserName();
+}
+
+function updateAvatarUI() {
+    const name = getUserName();
+    document.getElementById('avatarInitial').textContent = name ? name.charAt(0).toUpperCase() : '?';
+    document.getElementById('avatarName').textContent    = name || 'Sin nombre';
+}
+
+function updateToggleUI() { document.getElementById('autoCleanToggle')?.classList.toggle('on', getAutoClean()); }
+
+document.getElementById('autoCleanToggle').addEventListener('click', function() {
+    setAutoClean(!getAutoClean()); updateToggleUI();
+    showToast(getAutoClean() ? 'Limpieza automática activada' : 'Limpieza automática desactivada');
+});
+
+function confirmMoveAllToTrash() {
+    const list = getProjects();
+    if (!list.length) { showToast('No hay códigos guardados'); return; }
+    openModal('Mover todo a la papelera', `Se moverán ${list.length} código(s) a la papelera. Tendrás 7 días para recuperarlos.`, () => {
+        const now = Date.now();
+        saveTrash([...list.map(p => ({ ...p, deletedAt: now })), ...getTrash()]);
+        saveProjects([]); renderAll(); showToast('Todos los códigos movidos a la papelera');
+    });
+}
+
+function updateStorageBar() {
+    const count = getProjects().length;
+    document.getElementById('storageBarFill').style.width = Math.min(100, count) + '%';
+    document.getElementById('storageCount').textContent   = `${count} / 100`;
+}
+
+function updateStats() {
+    const list = getProjects(), now = Date.now(), MONTH = 30 * 24 * 60 * 60 * 1000;
+    document.getElementById('statTotal').textContent  = list.length;
+    document.getElementById('statRecent').textContent = list.filter(p => (now - (p.lastModified || p.createdAt || 0)) < MONTH).length;
+    document.getElementById('statTypes').textContent  = new Set(list.map(p => p.type)).size;
+}
+
+function openModal(title, desc, onConfirm) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalDesc').textContent  = desc;
+    document.getElementById('modalConfirmBtn').onclick = () => { onConfirm(); closeModal(); };
+    document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+let _toastTimer;
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show'); clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function renderAll() {
+    renderTypeCards('homeTypeCards');
+    renderQrList('homeRecents', 5);
+    renderQrList('savedList');
+    renderTrash(); updateStats(); updateGreeting(); updateAvatarUI(); updateToggleUI(); updateStorageBar();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('koda_username') || '';
+    document.getElementById('userNameInput').value = saved;
+    startup(); renderAll();
+});
+</script>
+</body>
+</html>

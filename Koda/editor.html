@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koda — Editor QR</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@10..48,600;10..48,700;10..48,800;10..48,900&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="icon" href="favicon.png">
+<style>
+:root {
+  --bg:#f4f3ee; --surface:#fff; --surface-2:#f7f6f2;
+  --border:#e0ddd5; --border-hover:#c8c4b8;
+  --text:#111110; --text-2:#4a4845; --text-3:#908d86;
+  --toolbar-bg:#111110; --toolbar-border:rgba(255,255,255,.06);
+  --accent:#e8431b; --accent-hover:#cd3a16; --accent-soft:#fff2ee;
+  --green:#16a34a; --green-soft:#f0fdf4; --green-border:#bbf7d0;
+  --red:#dc2626; --red-soft:#fef2f2; --red-border:#fecaca;
+  --amber:#b45309; --amber-soft:#fffbeb; --amber-border:#fde68a;
+  --violet:#5b21b6; --violet-soft:#f5f3ff; --violet-border:#ddd6fe;
+  --indigo:#3730a3; --indigo-soft:#eef2ff; --indigo-border:#c7d2fe;
+  --cyan:#0e7490; --cyan-soft:#ecfeff;
+  --radius-sm:8px; --radius:12px; --radius-lg:16px; --radius-xl:20px;
+  --shadow:0 2px 8px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.06);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.05);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+
+/* ── TOOLBAR ── */
+.main-toolbar{
+  position:fixed;top:0;left:0;right:0;height:56px;
+  background:var(--toolbar-bg);border-bottom:1px solid var(--toolbar-border);
+  display:flex;align-items:center;padding:0 20px;gap:6px;z-index:1000;
+}
+.toolbar-brand{
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+  border-radius:8px;padding:6px 10px 6px 8px;
+  background:none;border:none;transition:background .13s;margin-right:8px;
+}
+.toolbar-brand:hover{background:rgba(255,255,255,.07)}
+.toolbar-brand-logo{width:26px;height:26px;border-radius:7px;object-fit:contain;}
+.toolbar-logo{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:16px;font-weight:900;letter-spacing:3.5px;
+  background:linear-gradient(110deg,#ffffff 0%,#38bdf8 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.toolbar-back-arrow{width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.3);transition:color .13s}
+.toolbar-brand:hover .toolbar-back-arrow{color:rgba(255,255,255,.65)}
+.tb-sep{width:1px;height:26px;background:rgba(255,255,255,.1);margin:0 6px}
+.tb-btn{
+  height:34px;padding:0 14px;background:transparent;
+  border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);
+  border-radius:8px;font-size:12.5px;font-weight:500;cursor:pointer;
+  transition:all .13s;display:flex;align-items:center;gap:6px;
+  font-family:'DM Sans',inherit;white-space:nowrap;
+}
+.tb-btn svg{width:12px;height:12px;flex-shrink:0}
+.tb-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.85)}
+.tb-btn.accent-green{background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.3);color:#86efac}
+.tb-btn.accent-green:hover{background:var(--green);border-color:var(--green);color:white}
+.tb-btn.accent-blue{background:rgba(8,145,178,.12);border-color:rgba(8,145,178,.3);color:#67e8f9}
+.tb-btn.accent-blue:hover{background:#0891b2;border-color:#0891b2;color:white}
+.tb-btn.accent-violet{background:rgba(91,33,182,.12);border-color:rgba(91,33,182,.3);color:#c4b5fd}
+.tb-btn.accent-violet:hover{background:var(--violet);border-color:var(--violet);color:white}
+.tb-btn.accent-orange{background:rgba(232,67,27,.12);border-color:rgba(232,67,27,.3);color:#fdba74}
+.tb-btn.accent-orange:hover{background:var(--accent);border-color:var(--accent);color:white}
+.tb-spacer{flex:1}
+.tb-info{
+  display:flex;align-items:center;gap:16px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,.3);
+}
+.tb-info-item{display:flex;align-items:center;gap:5px}
+.ti-l{color:rgba(255,255,255,.2);font-size:10px}
+.ti-v{color:rgba(255,255,255,.65);font-weight:600}
+
+/* ── FOOTER ── */
+.mini-footer{
+  position:fixed;bottom:0;left:0;right:0;height:28px;
+  background:var(--toolbar-bg);border-top:1px solid var(--toolbar-border);
+  display:flex;align-items:center;padding:0 20px;z-index:1000;
+}
+.footer-text{font-size:10.5px;color:rgba(255,255,255,.2);letter-spacing:.5px;font-weight:500}
+
+/* ── CANVAS ── */
+.canvas-workspace{
+  position:fixed;top:56px;left:0;right:0;bottom:28px;overflow:hidden;
+  background:#e8e6e0;
+  background-image:
+    radial-gradient(rgba(0,0,0,.12) 1px,transparent 1px),
+    radial-gradient(rgba(0,0,0,.12) 1px,transparent 1px);
+  background-size:20px 20px;background-position:0 0,10px 10px;cursor:default;
+}
+.canvas-workspace.panning{cursor:grabbing}
+.canvas-content{
+  position:relative;width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  padding:60px 40px;will-change:transform;
+}
+
+/* ── QR CARD ── */
+.qr-card{
+  background:white;border-radius:24px;
+  box-shadow:0 32px 80px rgba(0,0,0,.1),0 8px 24px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.04);
+  padding:32px;display:flex;flex-direction:column;align-items:center;
+  gap:16px;min-width:200px;position:relative;
+}
+#qrPreview{display:flex;align-items:center;justify-content:center}
+#qrPreview canvas{display:block}
+.qr-card-label{
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;
+  color:#333;text-align:center;letter-spacing:2px;text-transform:uppercase;opacity:.65;
+}
+.qr-card-label:empty{display:none}
+
+/* ── FLOATING PANELS ── */
+.floating-panel{
+  position:fixed;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lg);display:none;flex-direction:column;
+  min-width:300px;max-width:700px;width:360px;
+  max-height:calc(100vh - 110px);z-index:100;overflow:hidden;
+}
+.floating-panel.active{display:flex}
+.floating-panel.minimized{height:46px!important;max-height:46px!important;overflow:hidden}
+.floating-panel.minimized .panel-content,.floating-panel.minimized .resize-handle{display:none}
+
+/* RESIZE HANDLES */
+.resize-handle{position:absolute;background:transparent;z-index:10}
+.resize-handle-right{top:0;right:-4px;width:12px;height:100%;cursor:ew-resize}
+.resize-handle-left{top:0;left:-4px;width:12px;height:100%;cursor:ew-resize}
+.resize-handle-bottom{bottom:-4px;left:0;width:100%;height:12px;cursor:ns-resize}
+.resize-handle-top{top:-4px;left:0;width:100%;height:12px;cursor:ns-resize}
+.resize-handle-corner{width:24px;height:24px}
+.resize-handle-corner-se{bottom:-4px;right:-4px;cursor:nwse-resize}
+.resize-handle-corner-sw{bottom:-4px;left:-4px;cursor:nesw-resize}
+.resize-handle-corner-ne{top:-4px;right:-4px;cursor:nesw-resize}
+.resize-handle-corner-nw{top:-4px;left:-4px;cursor:nwse-resize}
+
+/* PANEL HEADER */
+.panel-header{
+  background:var(--toolbar-bg);border-bottom:1px solid rgba(255,255,255,.06);
+  padding:12px 16px;display:flex;align-items:center;gap:8px;
+  cursor:move;user-select:none;flex-shrink:0;
+}
+.panel-title{
+  flex:1;font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;
+  color:rgba(255,255,255,.4);
+}
+.panel-controls{display:flex;gap:3px}
+.panel-btn{
+  width:22px;height:22px;border:none;background:transparent;
+  color:rgba(255,255,255,.3);cursor:pointer;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;line-height:1;transition:background .12s,color .12s;
+}
+.panel-btn:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8)}
+.panel-content{
+  padding:0 0 4px;overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;
+}
+.panel-content::-webkit-scrollbar{width:5px}
+.panel-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── EDITOR SECTIONS ── */
+.editor-section{padding:18px 20px 16px;border-bottom:1px solid var(--border)}
+.editor-section:last-child{border-bottom:none}
+.section-header{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.section-header h3{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:2px;
+  color:var(--text-3);margin:0;display:flex;align-items:center;gap:7px;
+}
+.section-header h3 i{font-size:13px;color:var(--accent)}
+.section-header h3 svg{width:13px;height:13px;color:var(--accent)}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:16px}
+.form-group:last-child{margin-bottom:0}
+.form-label{display:block;font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:7px}
+.form-input,.form-select,.form-textarea{
+  width:100%;padding:9px 12px;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);font-family:'DM Sans',inherit;
+  font-size:13.5px;color:var(--text);background:var(--surface);
+  transition:border-color .15s,box-shadow .15s;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{
+  outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,67,27,.1);
+}
+.form-textarea{
+  resize:vertical;min-height:90px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.65;
+}
+.form-help{font-size:11.5px;color:var(--text-3);margin-top:5px;line-height:1.5}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.divider{height:1px;background:var(--border);margin:16px 0}
+.form-input.mono{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.5px}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:9px 16px;border:none;border-radius:var(--radius-sm);font-weight:600;
+  cursor:pointer;transition:all .15s;font-size:13px;
+  display:inline-flex;align-items:center;gap:7px;justify-content:center;
+  font-family:'DM Sans',inherit;
+}
+.btn svg{width:13px;height:13px}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn:active{transform:translateY(0);box-shadow:none}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-success{background:var(--green);color:white}
+.btn-success:hover{background:#15803d}
+.btn-violet{background:var(--violet);color:white}
+.btn-violet:hover{background:#4c1d95}
+.btn-secondary{background:var(--surface-2);color:var(--text-2);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--border);color:var(--text)}
+.btn-block{width:100%}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-group{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* ── RANGE ── */
+.range-group{display:flex;align-items:center;gap:12px}
+input[type=range]{
+  flex:1;height:4px;border-radius:99px;outline:none;
+  -webkit-appearance:none;background:var(--border);cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--accent);cursor:pointer;
+  box-shadow:0 0 0 3px rgba(232,67,27,0);transition:transform .15s,box-shadow .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover{
+  transform:scale(1.15);box-shadow:0 0 0 3px rgba(232,67,27,.15);
+}
+.range-value{
+  min-width:44px;text-align:center;font-weight:700;
+  color:var(--accent);font-size:12px;font-family:'JetBrains Mono',monospace;
+}
+
+/* ── COLORS ── */
+.color-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.color-item label{font-size:11px;color:var(--text-3);font-weight:500;display:block;margin-bottom:5px}
+input[type=color]{
+  width:100%;height:38px;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);cursor:pointer;padding:2px;background:var(--surface);
+}
+
+/* ── DOT STYLES ── */
+.dot-style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dot-style-btn{
+  padding:9px 6px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--surface-2);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .15s;
+}
+.dot-style-btn:hover{border-color:var(--border-hover);background:var(--accent-soft)}
+.dot-style-btn.selected{border-color:var(--accent);background:var(--accent-soft)}
+.dot-style-btn .ds-label{font-size:10px;font-weight:600;color:var(--text-3)}
+.dot-style-btn.selected .ds-label{color:var(--accent)}
+.dot-preview{width:28px;height:28px;display:grid;grid-template-columns:1fr 1fr;gap:3px}
+.dp-cell{background:var(--text)}
+
+/* ── EC BUTTONS ── */
+.ec-group{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ec-btn{
+  padding:7px 4px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  background:var(--surface-2);cursor:pointer;
+  font-size:12px;font-weight:700;color:var(--text-3);
+  font-family:'JetBrains Mono',monospace;transition:all .15s;text-align:center;
+}
+.ec-btn:hover{border-color:var(--border-hover);color:var(--text)}
+.ec-btn.selected{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+
+/* ── LOGO ZONE ── */
+.logo-drop-zone{
+  border:2px dashed var(--border);border-radius:var(--radius-lg);
+  padding:24px;text-align:center;cursor:pointer;
+  transition:border-color .2s,background .2s;background:var(--surface-2);
+}
+.logo-drop-zone:hover{border-color:var(--accent);background:var(--accent-soft)}
+.logo-drop-zone svg{color:var(--text-3);margin-bottom:8px}
+.logo-preview-wrap{
+  display:flex;align-items:center;gap:12px;padding:12px;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);
+}
+.logo-preview-wrap img{width:48px;height:48px;object-fit:contain;border-radius:8px;border:1px solid var(--border)}
+.logo-preview-wrap .lp-info{flex:1;min-width:0}
+.logo-preview-wrap .lp-name{font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logo-preview-wrap .lp-remove{font-size:11px;color:var(--red);cursor:pointer;font-weight:600;border:none;background:none;padding:0;margin-top:3px;display:block;transition:opacity .15s}
+.logo-preview-wrap .lp-remove:hover{opacity:.7}
+
+/* ── EXPORT SIZES ── */
+.size-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.size-btn{
+  padding:14px 8px;border:1.5px solid var(--border);border-radius:var(--radius);
+  background:var(--surface-2);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .15s;
+}
+.size-btn:hover{border-color:var(--accent);background:var(--accent-soft)}
+.size-btn .sz-px{font-size:15px;font-weight:800;color:var(--text);font-family:'JetBrains Mono',monospace}
+.size-btn .sz-label{font-size:10px;color:var(--text-3);font-weight:500}
+
+/* ── TYPE TABS ── */
+.type-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px}
+.type-tab{
+  padding:5px 12px;border:1.5px solid var(--border);border-radius:99px;
+  font-size:11.5px;font-weight:600;cursor:pointer;
+  background:var(--surface-2);color:var(--text-2);transition:all .15s;
+}
+.type-tab:hover{border-color:var(--border-hover);color:var(--text)}
+.type-tab.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+
+/* ── NOTICE BOXES ── */
+.warning-box{background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:var(--radius-sm);padding:11px 14px;margin-bottom:16px;font-size:12px;color:#78350f;line-height:1.55}
+.info-box{background:var(--indigo-soft);border:1px solid var(--indigo-border);border-radius:var(--radius-sm);padding:11px 14px;margin-bottom:16px;font-size:12px;color:#3730a3;line-height:1.55}
+.danger-box{background:var(--red-soft);border:1px solid var(--red-border);border-radius:var(--radius-sm);padding:11px 14px;margin-bottom:16px;font-size:12px;color:#991b1b;line-height:1.55}
+
+/* ── TOAST ── */
+.editor-toast{
+  position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:var(--text);color:white;padding:10px 20px;border-radius:10px;
+  font-size:13px;font-weight:500;opacity:0;transition:opacity .22s,transform .22s;
+  pointer-events:none;z-index:3000;white-space:nowrap;box-shadow:var(--shadow-lg);
+  display:flex;align-items:center;gap:8px;
+}
+.editor-toast::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.editor-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="main-toolbar">
+  <button class="toolbar-brand" onclick="goToMenu()" title="Volver al inicio">
+    <div class="toolbar-back-arrow">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13L5 8l5-5"/></svg>
+    </div>
+    <img src="logo.png" class="toolbar-brand-logo" alt="" onerror="this.style.display='none'">
+    <div class="toolbar-logo">KODA</div>
+  </button>
+
+  <div class="tb-sep"></div>
+  <button class="tb-btn" onclick="togglePanel('panelContent')">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><path d="M8 11h5M11 8v3"/></svg>
+    Contenido
+  </button>
+  <button class="tb-btn" onclick="togglePanel('panelStyle')">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="2"/><path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.7 2.7l1 1M10.3 10.3l1 1M11.3 2.7l-1 1M3.7 10.3l-1 1"/></svg>
+    Estilo
+  </button>
+  <button class="tb-btn" onclick="togglePanel('panelLogo')">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="12" height="9" rx="2"/><circle cx="5" cy="7" r="1.5"/><path d="M1 10l4-3.5 2.5 2 3-3.5 3 4"/></svg>
+    Logo
+  </button>
+  <button class="tb-btn" onclick="togglePanel('panelExport')">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v2a1 1 0 001 1h8a1 1 0 001-1v-2"/><path d="M7 1v8M4 6l3 3 3-3"/></svg>
+    Exportar
+  </button>
+
+  <div class="tb-sep"></div>
+  <button class="tb-btn accent-green" onclick="generateQR()">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><path d="M8 11h5M11 8v3"/></svg>
+    Generar
+  </button>
+  <button class="tb-btn accent-blue" onclick="saveToIndex()">
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 13H3a1 1 0 01-1-1V2a1 1 0 011-1h6.5L13 4.5V12a1 1 0 01-1 1z"/><path d="M9 1v4H4"/></svg>
+    Guardar
+  </button>
+
+  <div class="tb-spacer"></div>
+  <div class="tb-info">
+    <div class="tb-info-item"><span class="ti-l">Tipo</span>&nbsp;<span class="ti-v" id="statusType">URL</span></div>
+    <div class="tb-info-item"><span class="ti-l">EC</span>&nbsp;<span class="ti-v" id="statusEC">M</span></div>
+    <div class="tb-info-item"><span class="ti-l">Tamaño</span>&nbsp;<span class="ti-v" id="statusSize">280px</span></div>
+  </div>
+</div>
+
+<!-- CANVAS -->
+<div class="canvas-workspace" id="canvasWorkspace">
+  <div class="canvas-content" id="canvasContent">
+    <div class="qr-card" id="qrCard">
+      <div id="qrPreview"></div>
+      <div class="qr-card-label" id="qrCardLabel"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL: CONTENIDO -->
+<div class="floating-panel" id="panelContent" style="left:36px;top:72px;">
+  <div class="panel-header" data-panel="panelContent">
+    <span class="panel-title">Contenido del QR</span>
+    <div class="panel-controls">
+      <button class="panel-btn" onclick="minimizePanel('panelContent')">−</button>
+      <button class="panel-btn" onclick="closePanel('panelContent')">×</button>
+    </div>
+  </div>
+  <div class="panel-content">
+
+    <div class="editor-section">
+      <div class="section-header">
+        <h3>
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h10M2 7h7M2 10h5"/></svg>
+          Nombre del código
+        </h3>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <input type="text" class="form-input" id="qrName" placeholder="Mi código QR..." oninput="updateStatus()">
+      </div>
+    </div>
+
+    <div class="editor-section">
+      <div class="section-header">
+        <h3>
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>
+          Tipo de contenido
+        </h3>
+      </div>
+      <div class="type-tabs" id="typeTabs">
+        <button class="type-tab active" data-type="custom"  onclick="switchType('custom')">Custom</button>
+        <button class="type-tab"        data-type="url"     onclick="switchType('url')">URL</button>
+        <button class="type-tab"        data-type="text"    onclick="switchType('text')">Texto</button>
+        <button class="type-tab"        data-type="wifi"    onclick="switchType('wifi')">WiFi</button>
+        <button class="type-tab"        data-type="vcard"   onclick="switchType('vcard')">vCard</button>
+        <button class="type-tab"        data-type="email"   onclick="switchType('email')">Email</button>
+        <button class="type-tab"        data-type="crypto"  onclick="switchType('crypto')">Cripto</button>
+        <button class="type-tab"        data-type="paypal"  onclick="switchType('paypal')">PayPal</button>
+        <button class="type-tab"        data-type="totp"    onclick="switchType('totp')">2FA</button>
+        <button class="type-tab"        data-type="event"   onclick="switchType('event')">Evento</button>
+        <button class="type-tab"        data-type="medical" onclick="switchType('medical')">SOS</button>
+      </div>
+    </div>
+
+    <div class="editor-section">
+      <div class="section-header" id="dynamicSectionHeader">
+        <h3>
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1L13 4v6l-6 3L1 10V4z"/></svg>
+          <span id="dynamicSectionTitle">Configuración</span>
+        </h3>
+      </div>
+      <div id="dynamic-inputs-container"></div>
+    </div>
+
+    <div class="editor-section">
+      <div class="section-header">
+        <h3>
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="12" height="7" rx="1.5"/><path d="M4 4V3a2 2 0 014 0v1"/></svg>
+          Etiqueta de tarjeta
+        </h3>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <input type="text" class="form-input" id="cardLabel" placeholder="Escanéame" oninput="updateCardLabel()">
+      </div>
+    </div>
+
+    <div class="editor-section" style="border-bottom:none">
+      <button class="btn btn-success btn-block" onclick="generateQR()">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><path d="M8 11h5M11 8v3"/></svg>
+        Generar QR
+      </button>
+    </div>
+  </div>
+  <div class="resize-handle resize-handle-top"></div>
+  <div class="resize-handle resize-handle-right"></div>
+  <div class="resize-handle resize-handle-bottom"></div>
+  <div class="resize-handle resize-handle-left"></div>
+  <div class="resize-handle resize-handle-corner resize-handle-corner-se"></div>
+  <div class="resize-handle resize-handle-corner resize-handle-corner-sw"></div>
+</div>
+
+<!-- PANEL: ESTILO -->
+<div class="floating-panel" id="panelStyle" style="right:36px;top:72px;">
+  <div class="panel-header" data-panel="panelStyle">
+    <span class="panel-title">Estilo Visual</span>
+    <div class="panel-controls">
+      <button class="panel-btn" onclick="minimizePanel('panelStyle')">−</button>
+      <button class="panel-btn" onclick="closePanel('panelStyle')">×</button>
+    </div>
+  </div>
+  <div class="panel-content">
+    <div class="editor-section">
+      <div class="form-group">
+        <label class="form-label">Colores del QR</label>
+        <div class="color-row">
+          <div class="color-item"><label>Puntos</label><input type="color" id="fgColor" value="#000000" oninput="onStyleChange()"></div>
+          <div class="color-item"><label>Fondo</label><input type="color" id="bgColor" value="#ffffff" oninput="onStyleChange()"></div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label class="form-label">Estilo de puntos</label>
+        <div class="dot-style-grid" id="dotStyleGrid">
+          <button class="dot-style-btn selected" data-style="square" onclick="selectDotStyle('square')">
+            <div class="dot-preview"><div class="dp-cell" style="border-radius:0"></div><div class="dp-cell" style="border-radius:0"></div><div class="dp-cell" style="border-radius:0"></div><div class="dp-cell" style="border-radius:0"></div></div>
+            <span class="ds-label">Cuadrado</span>
+          </button>
+          <button class="dot-style-btn" data-style="dots" onclick="selectDotStyle('dots')">
+            <div class="dot-preview"><div class="dp-cell" style="border-radius:50%"></div><div class="dp-cell" style="border-radius:50%"></div><div class="dp-cell" style="border-radius:50%"></div><div class="dp-cell" style="border-radius:50%"></div></div>
+            <span class="ds-label">Círculos</span>
+          </button>
+          <button class="dot-style-btn" data-style="rounded" onclick="selectDotStyle('rounded')">
+            <div class="dot-preview"><div class="dp-cell" style="border-radius:4px"></div><div class="dp-cell" style="border-radius:4px"></div><div class="dp-cell" style="border-radius:4px"></div><div class="dp-cell" style="border-radius:4px"></div></div>
+            <span class="ds-label">Redondeado</span>
+          </button>
+          <button class="dot-style-btn" data-style="extra-rounded" onclick="selectDotStyle('extra-rounded')">
+            <div class="dot-preview"><div class="dp-cell" style="border-radius:8px"></div><div class="dp-cell" style="border-radius:8px"></div><div class="dp-cell" style="border-radius:8px"></div><div class="dp-cell" style="border-radius:8px"></div></div>
+            <span class="ds-label">Extra Round</span>
+          </button>
+          <button class="dot-style-btn" data-style="classy" onclick="selectDotStyle('classy')">
+            <div class="dot-preview"><div class="dp-cell" style="border-radius:4px 0 0 0"></div><div class="dp-cell" style="border-radius:0 4px 0 0"></div><div class="dp-cell" style="border-radius:0 0 0 4px"></div><div class="dp-cell" style="border-radius:0 0 4px 0"></div></div>
+            <span class="ds-label">Classy</span>
+          </button>
+          <button class="dot-style-btn" data-style="classy-rounded" onclick="selectDotStyle('classy-rounded')">
+            <div class="dot-preview"><div class="dp-cell" style="border-radius:6px 2px 2px 2px"></div><div class="dp-cell" style="border-radius:2px 6px 2px 2px"></div><div class="dp-cell" style="border-radius:2px 2px 2px 6px"></div><div class="dp-cell" style="border-radius:2px 2px 6px 2px"></div></div>
+            <span class="ds-label">Classy Round</span>
+          </button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label class="form-label">Corrección de error</label>
+        <div class="ec-group">
+          <button class="ec-btn"          data-ec="L" onclick="selectEC('L')">L</button>
+          <button class="ec-btn selected" data-ec="M" onclick="selectEC('M')">M</button>
+          <button class="ec-btn"          data-ec="Q" onclick="selectEC('Q')">Q</button>
+          <button class="ec-btn"          data-ec="H" onclick="selectEC('H')">H</button>
+        </div>
+        <div class="form-help">Nivel H recomendado si usas logo. Mayor nivel = QR más denso.</div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label class="form-label">Margen (zona silenciosa)</label>
+        <div class="range-group">
+          <input type="range" id="qrMargin" min="0" max="10" value="4" oninput="onStyleChange()">
+          <span class="range-value" id="qrMarginVal">4</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tamaño de previsualización</label>
+        <div class="range-group">
+          <input type="range" id="previewSize" min="150" max="420" value="280" step="10" oninput="onSizeChange()">
+          <span class="range-value" id="previewSizeVal">280px</span>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label class="form-label">Colores de la tarjeta</label>
+        <div class="color-row">
+          <div class="color-item"><label>Fondo</label><input type="color" id="cardBgColor" value="#ffffff" oninput="updateCardStyle()"></div>
+          <div class="color-item"><label>Etiqueta</label><input type="color" id="cardLabelColor" value="#333333" oninput="updateCardStyle()"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="resize-handle resize-handle-top"></div>
+  <div class="resize-handle resize-handle-right"></div>
+  <div class="resize-handle resize-handle-bottom"></div>
+  <div class="resize-handle resize-handle-left"></div>
+  <div class="resize-handle resize-handle-corner resize-handle-corner-se"></div>
+  <div class="resize-handle resize-handle-corner resize-handle-corner-sw"></div>
+</div>
+
+<!-- PANEL: LOGO -->
+<div class="floating-panel" id="panelLogo" style="left:36px;top:390px;">
+  <div class="panel-header" data-panel="panelLogo">
+    <span class="panel-title">Logo / Imagen</span>
+    <div class="panel-controls">
+      <button class="panel-btn" onclick="minimizePanel('panelLogo')">−</button>
+      <button class="panel-btn" onclick="closePanel('panelLogo')">×</button>
+    </div>
+  </div>
+  <div class="panel-content">
+    <div class="editor-section">
+      <div class="warning-box">Activa corrección de error <strong>H</strong> en Estilo para mayor legibilidad con logo.</div>
+      <div id="logoDropZone" class="logo-drop-zone" onclick="document.getElementById('logoFileInput').click()">
+        <input type="file" id="logoFileInput" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="28" height="22" rx="3"/><circle cx="11" cy="13" r="3"/><path d="M2 22l8-8 5 5 6-8 9 11"/></svg>
+        <p style="margin-top:8px;font-size:13px;font-weight:500;color:var(--text-2)">Haz clic para subir logo</p>
+        <p style="font-size:11px;color:var(--text-3);margin-top:3px">PNG, JPG, SVG — fondo transparente recomendado</p>
+      </div>
+      <div id="logoPreview" style="display:none;margin-top:12px"></div>
+      <div class="form-group" id="logoSizeGroup" style="margin-top:16px;display:none">
+        <label class="form-label">Tamaño del logo</label>
+        <div class="range-group">
+          <input type="range" id="logoSize" min="5" max="40" value="20" oninput="onStyleChange()">
+          <span class="range-value" id="logoSizeVal">20%</span>
+        </div>
+      </div>
+      <div class="form-group" id="logoMarginGroup" style="display:none">
+        <label class="form-label">Margen del logo</label>
+        <div class="range-group">
+          <input type="range" id="logoMargin" min="0" max="10" value="2" oninput="onStyleChange()">
+          <span class="range-value" id="logoMarginVal">2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="resize-handle resize-handle-top"></div>
+  <div class="resize-handle resize-handle-right"></div>
+  <div class="resize-handle resize-handle-bottom"></div>
+  <div class="resize-handle resize-handle-left"></div>
+  <div class="resize-handle resize-handle-corner resize-handle-corner-se"></div>
+</div>
+
+<!-- PANEL: EXPORTAR -->
+<div class="floating-panel" id="panelExport" style="right:36px;top:420px;">
+  <div class="panel-header" data-panel="panelExport">
+    <span class="panel-title">Exportar</span>
+    <div class="panel-controls">
+      <button class="panel-btn" onclick="minimizePanel('panelExport')">−</button>
+      <button class="panel-btn" onclick="closePanel('panelExport')">×</button>
+    </div>
+  </div>
+  <div class="panel-content">
+    <div class="editor-section">
+      <div class="form-group">
+        <label class="form-label">Exportar PNG — incluye etiqueta</label>
+        <div class="size-grid">
+          <button class="size-btn" onclick="exportPNG(512)"><span class="sz-px">512px</span><span class="sz-label">Redes sociales</span></button>
+          <button class="size-btn" onclick="exportPNG(1024)"><span class="sz-px">1024px</span><span class="sz-label">Impresión media</span></button>
+          <button class="size-btn" onclick="exportPNG(2048)"><span class="sz-px">2048px</span><span class="sz-label">Alta resolución</span></button>
+          <button class="size-btn" onclick="exportPNG(4096)"><span class="sz-px">4096px</span><span class="sz-label">Gran formato</span></button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label class="form-label">Exportar PDF</label>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" onclick="exportPDF('a4')">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="1" width="10" height="12" rx="2"/></svg>
+            A4
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="exportPDF('letter')">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="1" width="10" height="12" rx="2"/></svg>
+            Carta
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="exportPDF('oficio')">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="1" width="10" height="12" rx="2"/></svg>
+            Oficio
+          </button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label class="form-label">Tamaño personalizado</label>
+        <div style="display:flex;gap:8px">
+          <input type="number" class="form-input" id="customPxInput" value="800" min="64" max="4096" placeholder="800">
+          <button class="btn btn-primary btn-sm" style="flex-shrink:0" onclick="exportPNG(parseInt(document.getElementById('customPxInput').value)||800)">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10v2a1 1 0 001 1h8a1 1 0 001-1v-2"/><path d="M7 1v8M4 6l3 3 3-3"/></svg>
+            Descargar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="resize-handle resize-handle-top"></div>
+  <div class="resize-handle resize-handle-right"></div>
+  <div class="resize-handle resize-handle-bottom"></div>
+  <div class="resize-handle resize-handle-left"></div>
+  <div class="resize-handle resize-handle-corner resize-handle-corner-se"></div>
+</div>
+
+<div class="editor-toast" id="editorToast"></div>
+
+<div class="mini-footer">
+  <div class="footer-text">KODA — Editor QR</div>
+  <div style="flex:1"></div>
+  <div class="footer-text">doble clic para recentrar · clic der. para mover · scroll para zoom</div>
+  <div style="flex:1"></div>
+  <div class="footer-text">v2.0</div>
+</div>
+
+<script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TEMPLATES — Campos dinámicos
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const KODA_TEMPLATES = {
+  custom: {
+    title:'Datos personalizados',
+    fields:[{ id:'custom-data',label:'Contenido del QR',type:'textarea',placeholder:'Cualquier texto, URL o datos...' }],
+    help:{'custom-data':'El QR codificará exactamente este texto.'},
+  },
+  url: {
+    title:'Dirección web',
+    fields:[{ id:'url-url',label:'URL',type:'text',placeholder:'https://ejemplo.com' }],
+    help:{'url-url':'Incluye https:// para mayor compatibilidad.'},
+  },
+  text: {
+    title:'Texto libre',
+    fields:[{ id:'text-text',label:'Texto',type:'textarea',placeholder:'Escribe tu mensaje aquí...' }],
+  },
+  wifi: {
+    title:'Red WiFi',
+    fields:[
+      { id:'wifi-ssid',label:'Nombre de red (SSID)',type:'text',placeholder:'MiRedWiFi' },
+      { id:'wifi-password',label:'Contraseña',type:'text',placeholder:'Contraseña' },
+      { id:'wifi-encryption',label:'Cifrado',type:'select',options:['WPA/WPA2|WPA','WEP|WEP','Sin contraseña|nopass'] },
+    ],
+  },
+  vcard: {
+    title:'Tarjeta de contacto',
+    fields:[
+      { id:'vcard-name',label:'Nombre completo',type:'text',placeholder:'Juan García' },
+      { id:'vcard-phone',label:'Teléfono',type:'text',placeholder:'+34 600 000 000',row:'a' },
+      { id:'vcard-email',label:'Email',type:'text',placeholder:'correo@ej.com',row:'a' },
+      { id:'vcard-org',label:'Empresa',type:'text',placeholder:'Mi Empresa',row:'b' },
+      { id:'vcard-url',label:'Sitio web',type:'text',placeholder:'https://...',row:'b' },
+    ],
+  },
+  email: {
+    title:'Correo electrónico',
+    fields:[
+      { id:'email-email',label:'Dirección',type:'text',placeholder:'destino@ejemplo.com' },
+      { id:'email-subject',label:'Asunto',type:'text',placeholder:'Asunto del correo' },
+      { id:'email-body',label:'Mensaje',type:'textarea',placeholder:'Cuerpo del mensaje...',style:'min-height:70px' },
+    ],
+  },
+  crypto: {
+    title:'Pago en criptomonedas',
+    fields:[
+      { id:'crypto-coin',label:'Moneda',type:'select',options:['Bitcoin (BTC)|bitcoin','Ethereum (ETH)|ethereum','Litecoin (LTC)|litecoin','Dogecoin (DOGE)|dogecoin','Monero (XMR)|monero'] },
+      { id:'crypto-address',label:'Dirección de cartera',type:'text',placeholder:'bc1q...',mono:true },
+      { id:'crypto-amount',label:'Monto (opcional)',type:'number',placeholder:'0.001' },
+    ],
+    help:{'crypto-amount':'Cantidad en la moneda seleccionada. Déjalo vacío para que el pagador elija.'},
+  },
+  paypal: {
+    title:'Enlace PayPal.me',
+    fields:[
+      { id:'paypal-username',label:'Usuario PayPal.me',type:'text',placeholder:'miusuario' },
+      { id:'paypal-amount',label:'Monto sugerido',type:'number',placeholder:'25.00',row:'c' },
+      { id:'paypal-currency',label:'Divisa',type:'select',options:['Sin divisa|','USD|USD','EUR|EUR','GBP|GBP','COP|COP','MXN|MXN','BRL|BRL'],row:'c' },
+    ],
+    help:{'paypal-username':'Sin @ ni URL. Ejemplo: si tu link es paypal.me/koda, escribe koda.'},
+  },
+  totp: {
+    title:'Clave 2FA (TOTP)',
+    notice:{type:'info',text:'⚠️ Solo para administradores: este QR añade una cuenta 2FA a Google Authenticator u otras apps TOTP.'},
+    fields:[
+      { id:'totp-issuer',label:'Servicio / Emisor',type:'text',placeholder:'MiServicio' },
+      { id:'totp-account',label:'Cuenta / Usuario',type:'text',placeholder:'usuario@ejemplo.com' },
+      { id:'totp-secret',label:'Secreto Base32',type:'text',placeholder:'JBSWY3DPEHPK3PXP',mono:true },
+    ],
+    help:{'totp-secret':'Secreto generado por tu backend TOTP. Mayúsculas, sin espacios.'},
+  },
+  event: {
+    title:'Evento de calendario',
+    fields:[
+      { id:'event-title',label:'Título del evento',type:'text',placeholder:'Reunión de equipo' },
+      { id:'event-start',label:'Inicio',type:'datetime-local',row:'d' },
+      { id:'event-end',label:'Fin',type:'datetime-local',row:'d' },
+      { id:'event-location',label:'Lugar',type:'text',placeholder:'Sala B, Oficina Central' },
+      { id:'event-description',label:'Descripción',type:'textarea',placeholder:'Detalles del evento...',style:'min-height:60px' },
+    ],
+  },
+  medical: {
+    title:'ID Médico de emergencia',
+    notice:{type:'danger',text:'🚨 <strong>Tarjeta de emergencia:</strong> escanear muestra datos vitales sin desbloquear el teléfono.'},
+    fields:[
+      { id:'medical-name',label:'Nombre completo',type:'text',placeholder:'Ana López Martínez' },
+      { id:'medical-blood',label:'Grupo sanguíneo',type:'select',options:['—|','A+|A+','A-|A-','B+|B+','B-|B-','AB+|AB+','AB-|AB-','O+|O+','O-|O-'],row:'e' },
+      { id:'medical-phone',label:'Teléfono',type:'text',placeholder:'+34 600 000 000',row:'e' },
+      { id:'medical-allergies',label:'Alergias',type:'text',placeholder:'Penicilina, Látex...' },
+      { id:'medical-ice-name',label:'Contacto de emergencia',type:'text',placeholder:'Carlos López (padre)' },
+      { id:'medical-ice-phone',label:'Teléfono ICE',type:'text',placeholder:'+34 611 222 333' },
+      { id:'medical-notes',label:'Notas médicas',type:'textarea',placeholder:'Medicación, condiciones crónicas...',style:'min-height:60px' },
+    ],
+  },
+};
+
+function renderDynamicFields(type) {
+  const tpl = KODA_TEMPLATES[type] || KODA_TEMPLATES.custom;
+  const ttl = document.getElementById('dynamicSectionTitle');
+  if (ttl) ttl.textContent = tpl.title;
+  const container = document.getElementById('dynamic-inputs-container');
+  if (!container) return;
+  let html = '';
+  if (tpl.notice) html += `<div class="${tpl.notice.type}-box" style="margin-bottom:14px">${tpl.notice.text}</div>`;
+  const rows = {}, rendered = new Set();
+  tpl.fields.forEach(f => { if (f.row) { rows[f.row]=rows[f.row]||[]; rows[f.row].push(f); } });
+  const fieldHTML = f => {
+    const help = (tpl.help||{})[f.id];
+    const mono = f.mono ? ' mono':'';
+    let input;
+    if (f.type==='textarea') {
+      input=`<textarea class="form-textarea" id="${f.id}" placeholder="${f.placeholder||''}" oninput="onContentChange()"${f.style?` style="${f.style}"`:''} ></textarea>`;
+    } else if (f.type==='select') {
+      const opts=(f.options||[]).map(o=>{ const [lbl,val]=o.includes('|')?o.split('|'):[o,o]; return `<option value="${val}">${lbl}</option>`; }).join('');
+      input=`<select class="form-select" id="${f.id}" onchange="onContentChange()">${opts}</select>`;
+    } else {
+      input=`<input type="${f.type||'text'}" class="form-input${mono}" id="${f.id}" placeholder="${f.placeholder||''}" oninput="onContentChange()"${f.style?` style="${f.style}"`:''}>`;
+    }
+    return `<div class="form-group"><label class="form-label">${f.label}</label>${input}${help?`<div class="form-help">${help}</div>`:''}</div>`;
+  };
+  tpl.fields.forEach(f => {
+    if (rendered.has(f.id)) return;
+    if (f.row) {
+      const rf = rows[f.row];
+      html += `<div class="input-row">`+rf.map(x=>{ rendered.add(x.id); return fieldHTML(x); }).join('')+`</div>`;
+    } else { rendered.add(f.id); html += fieldHTML(f); }
+  });
+  container.innerHTML = html;
+}
+
+/* ━━ STATE ━━ */
+let _projectId=null,_projectCreatedAt=null,_currentType='custom';
+let _selectedDot='square',_selectedEC='M';
+let _logoDataUrl=null,_logoFileName='';
+let _qrInstance=null,panelZIndex=100;
+let isAnyDragging=false,isAnyResizing=false;
+let _contentTimer;
+
+function goToMenu(){ window.location.href='index.html'; }
+
+/* ━━ LAUNCH ━━ */
+function loadFromLaunch(){
+  const raw=localStorage.getItem('koda_launch');
+  if(!raw) return;
+  let launch; try{ launch=JSON.parse(raw); }catch{ return; }
+  localStorage.removeItem('koda_launch');
+  if(launch.type==='template'){
+    switchType(launch.config?.qrType||'custom');
+  } else if(launch.type==='project'){
+    const p=launch.data||{};
+    _projectId=p._id||null; _projectCreatedAt=p.createdAt||Date.now();
+    _currentType=p.type||'url';
+    document.getElementById('qrName').value=p.name||'';
+    document.getElementById('cardLabel').value=p.cardLabel||'';
+    const s=p.style||{};
+    if(s.fgColor) document.getElementById('fgColor').value=s.fgColor;
+    if(s.bgColor) document.getElementById('bgColor').value=s.bgColor;
+    if(s.cardBgColor) document.getElementById('cardBgColor').value=s.cardBgColor;
+    if(s.cardLabelColor) document.getElementById('cardLabelColor').value=s.cardLabelColor;
+    if(s.dotStyle){ _selectedDot=s.dotStyle; selectDotStyle(s.dotStyle,true); }
+    if(s.ec){ _selectedEC=s.ec; selectEC(s.ec,true); }
+    if(s.margin!=null){ document.getElementById('qrMargin').value=s.margin; document.getElementById('qrMarginVal').textContent=s.margin; }
+    if(s.previewSize){ document.getElementById('previewSize').value=s.previewSize; document.getElementById('previewSizeVal').textContent=s.previewSize+'px'; }
+    if(p.logo){ _logoDataUrl=p.logo; _logoFileName=p.logoName||'logo'; showLogoPreview(); }
+    switchType(_currentType,true);
+    const c=p.content||{};
+    if(_currentType==='url')    document.getElementById('url-url').value=c.url||'';
+    if(_currentType==='text')   document.getElementById('text-text').value=c.text||'';
+    if(_currentType==='wifi')  { document.getElementById('wifi-ssid').value=c.ssid||''; document.getElementById('wifi-password').value=c.password||''; document.getElementById('wifi-encryption').value=c.encryption||'WPA'; }
+    if(_currentType==='vcard') { document.getElementById('vcard-name').value=c.name||''; document.getElementById('vcard-phone').value=c.phone||''; document.getElementById('vcard-email').value=c.email||''; document.getElementById('vcard-org').value=c.org||''; document.getElementById('vcard-url').value=c.url||''; }
+    if(_currentType==='email') { document.getElementById('email-email').value=c.email||''; document.getElementById('email-subject').value=c.subject||''; document.getElementById('email-body').value=c.body||''; }
+    if(_currentType==='custom') document.getElementById('custom-data').value=c.data||'';
+    if(_currentType==='crypto') { document.getElementById('crypto-coin').value=c.coin||'bitcoin'; document.getElementById('crypto-address').value=c.address||''; document.getElementById('crypto-amount').value=c.amount||''; }
+    if(_currentType==='paypal') { document.getElementById('paypal-username').value=c.username||''; document.getElementById('paypal-amount').value=c.amount||''; document.getElementById('paypal-currency').value=c.currency||''; }
+    if(_currentType==='totp')   { document.getElementById('totp-issuer').value=c.issuer||''; document.getElementById('totp-account').value=c.account||''; document.getElementById('totp-secret').value=c.secret||''; }
+    if(_currentType==='event')  { document.getElementById('event-title').value=c.title||''; document.getElementById('event-start').value=c.start||''; document.getElementById('event-end').value=c.end||''; document.getElementById('event-location').value=c.location||''; document.getElementById('event-description').value=c.description||''; }
+    if(_currentType==='medical'){ document.getElementById('medical-name').value=c.name||''; document.getElementById('medical-blood').value=c.blood||''; document.getElementById('medical-phone').value=c.phone||''; document.getElementById('medical-allergies').value=c.allergies||''; document.getElementById('medical-ice-name').value=c.ice_name||''; document.getElementById('medical-ice-phone').value=c.ice_phone||''; document.getElementById('medical-notes').value=c.notes||''; }
+    updateCardLabel(); updateCardStyle(); generateQR(false);
+  }
+}
+
+/* ━━ TYPE ━━ */
+function switchType(t,skipGen){
+  _currentType=t;
+  document.querySelectorAll('.type-tab').forEach(b=>b.classList.toggle('active',b.dataset.type===t));
+  renderDynamicFields(t);
+  updateStatus();
+  if(!skipGen) onContentChange();
+}
+
+/* ━━ DATA BUILDER ━━ */
+function buildQRData(){
+  switch(_currentType){
+    case 'url':    return document.getElementById('url-url').value.trim()||'https://koda.app';
+    case 'text':   return document.getElementById('text-text').value.trim()||'KODA';
+    case 'wifi':   { const s=document.getElementById('wifi-ssid').value,p=document.getElementById('wifi-password').value,e=document.getElementById('wifi-encryption').value; return `WIFI:T:${e};S:${s};P:${p};;`; }
+    case 'vcard':  { const n=document.getElementById('vcard-name').value,ph=document.getElementById('vcard-phone').value,em=document.getElementById('vcard-email').value,o=document.getElementById('vcard-org').value,u=document.getElementById('vcard-url').value; return `BEGIN:VCARD\nVERSION:3.0\nFN:${n}\nTEL:${ph}\nEMAIL:${em}\nORG:${o}\nURL:${u}\nEND:VCARD`; }
+    case 'email':  { const em=document.getElementById('email-email').value,s=document.getElementById('email-subject').value,b=document.getElementById('email-body').value; return `mailto:${em}?subject=${encodeURIComponent(s)}&body=${encodeURIComponent(b)}`; }
+    case 'custom': return document.getElementById('custom-data').value.trim()||'KODA';
+    case 'crypto': { const coin=(document.getElementById('crypto-coin').value||'bitcoin').toLowerCase(),addr=document.getElementById('crypto-address').value.trim(),amt=document.getElementById('crypto-amount').value.trim(); return coin==='ethereum'?`ethereum:${addr}${amt?`?value=${amt}`:''}`:`${coin}:${addr}${amt?`?amount=${amt}`:''}`; }
+    case 'paypal': { const user=document.getElementById('paypal-username').value.trim(),amt=document.getElementById('paypal-amount').value.trim(),cur=document.getElementById('paypal-currency').value; let url=`https://paypal.me/${user}`; if(amt){url+=`/${amt}`;if(cur)url+=cur;} return url; }
+    case 'totp':   { const issuer=encodeURIComponent(document.getElementById('totp-issuer').value||'Koda'),account=encodeURIComponent(document.getElementById('totp-account').value||''),secret=document.getElementById('totp-secret').value.replace(/\s/g,'').toUpperCase(); return `otpauth://totp/${issuer}:${account}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`; }
+    case 'event':  { const fmt=d=>d?d.replace(/[-:]/g,'').replace('T','T').substring(0,15):''; const title=document.getElementById('event-title').value,start=fmt(document.getElementById('event-start').value),end=fmt(document.getElementById('event-end').value),loc=document.getElementById('event-location').value,desc=document.getElementById('event-description').value; return `BEGIN:VEVENT\nSUMMARY:${title}\nDTSTART:${start}\nDTEND:${end}\nLOCATION:${loc}\nDESCRIPTION:${desc}\nEND:VEVENT`; }
+    case 'medical':{ const name=document.getElementById('medical-name').value,phone=document.getElementById('medical-phone').value,blood=document.getElementById('medical-blood').value,allergies=document.getElementById('medical-allergies').value,iceName=document.getElementById('medical-ice-name').value,icePhone=document.getElementById('medical-ice-phone').value,notes=document.getElementById('medical-notes').value; return `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL;TYPE=CELL:${phone}\nX-BLOODTYPE:${blood}\nX-ALLERGIES:${allergies}\nNOTE:ICE: ${iceName} ${icePhone}. ${notes}\nEND:VCARD`; }
+    default: return 'KODA';
+  }
+}
+
+function getContent(){
+  const c={};
+  if(_currentType==='url')    c.url=document.getElementById('url-url').value;
+  if(_currentType==='text')   c.text=document.getElementById('text-text').value;
+  if(_currentType==='wifi')  { c.ssid=document.getElementById('wifi-ssid').value; c.password=document.getElementById('wifi-password').value; c.encryption=document.getElementById('wifi-encryption').value; }
+  if(_currentType==='vcard') { c.name=document.getElementById('vcard-name').value; c.phone=document.getElementById('vcard-phone').value; c.email=document.getElementById('vcard-email').value; c.org=document.getElementById('vcard-org').value; c.url=document.getElementById('vcard-url').value; }
+  if(_currentType==='email') { c.email=document.getElementById('email-email').value; c.subject=document.getElementById('email-subject').value; c.body=document.getElementById('email-body').value; }
+  if(_currentType==='custom') c.data=document.getElementById('custom-data').value;
+  if(_currentType==='crypto') { c.coin=document.getElementById('crypto-coin').value; c.address=document.getElementById('crypto-address').value; c.amount=document.getElementById('crypto-amount').value; }
+  if(_currentType==='paypal') { c.username=document.getElementById('paypal-username').value; c.amount=document.getElementById('paypal-amount').value; c.currency=document.getElementById('paypal-currency').value; }
+  if(_currentType==='totp')   { c.issuer=document.getElementById('totp-issuer').value; c.account=document.getElementById('totp-account').value; c.secret=document.getElementById('totp-secret').value; }
+  if(_currentType==='event')  { c.title=document.getElementById('event-title').value; c.start=document.getElementById('event-start').value; c.end=document.getElementById('event-end').value; c.location=document.getElementById('event-location').value; c.description=document.getElementById('event-description').value; }
+  if(_currentType==='medical'){ c.name=document.getElementById('medical-name').value; c.blood=document.getElementById('medical-blood').value; c.phone=document.getElementById('medical-phone').value; c.allergies=document.getElementById('medical-allergies').value; c.ice_name=document.getElementById('medical-ice-name').value; c.ice_phone=document.getElementById('medical-ice-phone').value; c.notes=document.getElementById('medical-notes').value; }
+  return c;
+}
+
+/* ━━ GENERATE ━━ */
+function generateQR(msg){
+  if(msg===undefined) msg=true;
+  const data=buildQRData();
+  const size=parseInt(document.getElementById('previewSize').value)||280;
+  const fg=document.getElementById('fgColor').value;
+  const bg=document.getElementById('bgColor').value;
+  const margin=parseInt(document.getElementById('qrMargin').value)||4;
+  const container=document.getElementById('qrPreview');
+  container.innerHTML='';
+  const opts={width:size,height:size,type:'canvas',data,dotsOptions:{color:fg,type:_selectedDot},backgroundOptions:{color:bg},qrOptions:{errorCorrectionLevel:_selectedEC},margin};
+  if(_logoDataUrl){
+    opts.image=_logoDataUrl;
+    opts.imageOptions={crossOrigin:'anonymous',margin:parseInt(document.getElementById('logoMargin').value)||2,imageSize:parseInt(document.getElementById('logoSize').value)/100||.2,hideBackgroundDots:true};
+  }
+  try{
+    _qrInstance=new QRCodeStyling(opts);
+    _qrInstance.append(container);
+    if(msg) showEditorToast('Código QR generado');
+  }catch(e){ console.error(e); if(msg) showEditorToast('Error al generar el QR'); }
+  updateStatus();
+}
+
+function onContentChange(){ clearTimeout(_contentTimer); _contentTimer=setTimeout(()=>generateQR(false),500); }
+function onStyleChange(){
+  document.getElementById('qrMarginVal').textContent=document.getElementById('qrMargin').value;
+  document.getElementById('logoSizeVal').textContent=document.getElementById('logoSize').value+'%';
+  document.getElementById('logoMarginVal').textContent=document.getElementById('logoMargin').value;
+  clearTimeout(_contentTimer); _contentTimer=setTimeout(()=>generateQR(false),300);
+}
+function onSizeChange(){
+  const v=document.getElementById('previewSize').value;
+  document.getElementById('previewSizeVal').textContent=v+'px';
+  document.getElementById('statusSize').textContent=v+'px';
+  clearTimeout(_contentTimer); _contentTimer=setTimeout(()=>generateQR(false),300);
+}
+
+/* ━━ SELECTORS ━━ */
+function selectDotStyle(style,silent){
+  _selectedDot=style;
+  document.querySelectorAll('.dot-style-btn').forEach(b=>b.classList.toggle('selected',b.dataset.style===style));
+  if(!silent) generateQR(false);
+}
+function selectEC(ec,silent){
+  _selectedEC=ec;
+  document.querySelectorAll('.ec-btn').forEach(b=>b.classList.toggle('selected',b.dataset.ec===ec));
+  document.getElementById('statusEC').textContent=ec;
+  if(!silent) generateQR(false);
+}
+
+/* ━━ CARD ━━ */
+function updateCardLabel(){
+  const label=document.getElementById('cardLabel').value;
+  const el=document.getElementById('qrCardLabel');
+  el.textContent=label; el.style.display=label?'block':'none';
+}
+function updateCardStyle(){
+  document.getElementById('qrCard').style.background=document.getElementById('cardBgColor').value;
+  document.getElementById('qrCardLabel').style.color=document.getElementById('cardLabelColor').value;
+}
+
+/* ━━ LOGO ━━ */
+function handleLogoUpload(e){
+  const file=e.target.files[0]; if(!file) return;
+  _logoFileName=file.name;
+  const reader=new FileReader();
+  reader.onload=ev=>{ _logoDataUrl=ev.target.result; showLogoPreview(); generateQR(false); showEditorToast('Logo cargado'); };
+  reader.readAsDataURL(file);
+}
+function showLogoPreview(){
+  document.getElementById('logoDropZone').style.display='none';
+  document.getElementById('logoSizeGroup').style.display='block';
+  document.getElementById('logoMarginGroup').style.display='block';
+  const prev=document.getElementById('logoPreview');
+  prev.style.display='block';
+  prev.innerHTML=`<div class="logo-preview-wrap"><img src="${_logoDataUrl}" alt="Logo"><div class="lp-info"><div class="lp-name">${_logoFileName}</div><button class="lp-remove" onclick="removeLogo()">× Eliminar logo</button></div></div>`;
+}
+function removeLogo(){
+  _logoDataUrl=null; _logoFileName='';
+  document.getElementById('logoDropZone').style.display='block';
+  document.getElementById('logoPreview').style.display='none';
+  document.getElementById('logoSizeGroup').style.display='none';
+  document.getElementById('logoMarginGroup').style.display='none';
+  document.getElementById('logoFileInput').value='';
+  generateQR(false);
+}
+
+/* ━━ EXPORT PNG ━━ */
+function exportPNG(size){
+  if(!size||size<64) size=512;
+  const cardElement=document.getElementById('qrCard');
+  const name=(document.getElementById('qrName').value.trim()||'koda-qr').replace(/[^a-zA-Z0-9-_]/g,'_');
+  showEditorToast(`Preparando PNG ${size}×${size}px…`);
+  const scale=size/cardElement.offsetWidth;
+  html2canvas(cardElement,{scale,backgroundColor:null,useCORS:true,logging:false,allowTaint:true}).then(canvas=>{
+    const link=document.createElement('a');
+    link.download=`${name}-${size}px.png`;
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+    showEditorToast(`PNG ${size}×${size}px descargado ✓`);
+  }).catch(err=>{ console.error('html2canvas error:',err); showEditorToast('Error al exportar PNG'); });
+}
+
+/* ━━ EXPORT PDF ━━ */
+async function exportPDF(pageSize){
+  if(!pageSize) pageSize='a4';
+  const data=buildQRData(),fg=document.getElementById('fgColor').value,bg=document.getElementById('bgColor').value;
+  const margin=parseInt(document.getElementById('qrMargin').value)||4;
+  const opts={width:550,height:550,type:'canvas',data,dotsOptions:{color:fg,type:_selectedDot},backgroundOptions:{color:bg},qrOptions:{errorCorrectionLevel:_selectedEC},margin};
+  if(_logoDataUrl){ opts.image=_logoDataUrl; opts.imageOptions={crossOrigin:'anonymous',margin:parseInt(document.getElementById('logoMargin').value)||2,imageSize:parseInt(document.getElementById('logoSize').value)/100||.2,hideBackgroundDots:true}; }
+  showEditorToast('Generando PDF…');
+  try{
+    const tmpQR=new QRCodeStyling(opts);
+    const blob=await tmpQR.getRawData('png');
+    const dataURL=await new Promise(res=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.readAsDataURL(blob); });
+    const {jsPDF}=window.jspdf;
+    let pdf;
+    if(pageSize==='oficio'){
+      // Oficio: 8.5" × 13" = 612pt × 936pt (tamaño legal largo latinoamericano)
+      pdf=new jsPDF({orientation:'portrait',unit:'pt',format:[612,936]});
+    } else {
+      pdf=new jsPDF({orientation:'portrait',unit:'pt',format:pageSize==='a4'?'a4':'letter'});
+    }
+    const pW=pdf.internal.pageSize.getWidth(),pH=pdf.internal.pageSize.getHeight();
+    const qrPt=Math.min(pW*.7,pH*.55);
+    const x=(pW-qrPt)/2,y=(pH-qrPt)/2-30;
+    pdf.addImage(dataURL,'PNG',x,y,qrPt,qrPt);
+    const label=document.getElementById('cardLabel').value||document.getElementById('qrName').value||'';
+    if(label){ pdf.setFontSize(14); pdf.setFont('helvetica','bold'); pdf.setTextColor(51,51,51); pdf.text(label,pW/2,y+qrPt+28,{align:'center'}); }
+    const name=(document.getElementById('qrName').value.trim()||'koda-qr').replace(/[^a-zA-Z0-9-_]/g,'_');
+    pdf.save(`${name}-${pageSize}.pdf`);
+    showEditorToast('PDF descargado ✓');
+  }catch(e){ console.error(e); showEditorToast('Error al generar PDF'); }
+}
+
+/* ━━ SAVE ━━ */
+function saveToIndex(){
+  const now=Date.now();
+  if(!_projectId){ _projectId='kqr_'+now+'_'+Math.random().toString(36).slice(2,7); _projectCreatedAt=now; }
+  const project={
+    _id:_projectId,name:document.getElementById('qrName').value.trim()||'Sin nombre',
+    type:_currentType,content:getContent(),
+    cardLabel:document.getElementById('cardLabel').value,
+    logo:_logoDataUrl,logoName:_logoFileName,
+    createdAt:_projectCreatedAt,lastModified:now,
+    style:{
+      fgColor:document.getElementById('fgColor').value,
+      bgColor:document.getElementById('bgColor').value,
+      cardBgColor:document.getElementById('cardBgColor').value,
+      cardLabelColor:document.getElementById('cardLabelColor').value,
+      dotStyle:_selectedDot,ec:_selectedEC,
+      margin:document.getElementById('qrMargin').value,
+      previewSize:document.getElementById('previewSize').value
+    }
+  };
+  const list=JSON.parse(localStorage.getItem('koda_projects')||'[]');
+  const idx=list.findIndex(p=>p._id===_projectId);
+  if(idx>=0) list[idx]=project; else list.unshift(project);
+  localStorage.setItem('koda_projects',JSON.stringify(list.slice(0,100)));
+  showEditorToast('Guardado en Mis Códigos ✓');
+}
+
+/* ━━ STATUS ━━ */
+function updateStatus(){
+  const labels={url:'URL',text:'TEXTO',wifi:'WIFI',vcard:'VCARD',email:'EMAIL',custom:'CUSTOM',crypto:'CRYPTO',paypal:'PAYPAL',totp:'2FA',event:'EVENT',medical:'SOS'};
+  document.getElementById('statusType').textContent=labels[_currentType]||'—';
+}
+
+/* ━━ TOAST ━━ */
+let _toastTimer;
+function showEditorToast(msg){
+  const t=document.getElementById('editorToast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(_toastTimer); _toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ━━ PANELS ━━ */
+function togglePanel(id){ const p=document.getElementById(id); p.classList.contains('active')?closePanel(id):openPanel(id); }
+function openPanel(id){ const p=document.getElementById(id); p.classList.add('active'); p.classList.remove('minimized'); bringToFront(p); }
+function closePanel(id){ document.getElementById(id).classList.remove('active'); }
+function minimizePanel(id){
+  const p=document.getElementById(id);
+  if(p.classList.contains('minimized')){ p.classList.remove('minimized'); if(p.dataset.ph){ p.style.height=p.dataset.ph; p.style.maxHeight=p.dataset.ph; delete p.dataset.ph; } }
+  else{ p.dataset.ph=p.style.height||p.offsetHeight+'px'; p.classList.add('minimized'); p.style.height='46px'; p.style.maxHeight='46px'; }
+}
+function bringToFront(p){ panelZIndex++; p.style.zIndex=panelZIndex; }
+
+/* ━━ DRAG ━━ */
+function initDraggable(){
+  document.querySelectorAll('.floating-panel').forEach(panel=>{
+    const header=panel.querySelector('.panel-header');
+    let drag=false,sx,sy,px,py;
+    header.addEventListener('mousedown',e=>{
+      if(e.target.closest('.panel-btn')||isAnyResizing) return;
+      e.preventDefault(); drag=true; isAnyDragging=true;
+      bringToFront(panel); sx=e.clientX; sy=e.clientY;
+      const r=panel.getBoundingClientRect(); px=r.left; py=r.top;
+      header.style.cursor='grabbing'; document.body.style.userSelect='none';
+    });
+    document.addEventListener('mousemove',e=>{
+      if(!drag||isAnyResizing) return; e.preventDefault();
+      let nx=px+(e.clientX-sx),ny=py+(e.clientY-sy);
+      ny=Math.max(56,Math.min(window.innerHeight-76,ny));
+      nx=Math.max(-(panel.offsetWidth-50),Math.min(window.innerWidth-50,nx));
+      panel.style.left=nx+'px'; panel.style.top=ny+'px';
+    });
+    document.addEventListener('mouseup',()=>{ if(drag){ drag=false; isAnyDragging=false; header.style.cursor='move'; document.body.style.userSelect=''; } });
+    panel.addEventListener('mousedown',e=>{ if(!e.target.closest('.resize-handle')) bringToFront(panel); });
+  });
+  initResize();
+}
+
+function initResize(){
+  document.querySelectorAll('.floating-panel').forEach(panel=>{
+    const MIN_W=300,MAX_W=700,MIN_H=200,MAX_H=window.innerHeight-120;
+    let res=false,dir=null,sx,sy,sw,sh,sl,st;
+    panel.querySelectorAll('.resize-handle').forEach(h=>{
+      let d='';
+      if(h.classList.contains('resize-handle-right'))  d='right';
+      else if(h.classList.contains('resize-handle-left'))  d='left';
+      else if(h.classList.contains('resize-handle-bottom')) d='bottom';
+      else if(h.classList.contains('resize-handle-top'))    d='top';
+      else if(h.classList.contains('resize-handle-corner-se')) d='se';
+      else if(h.classList.contains('resize-handle-corner-sw')) d='sw';
+      else if(h.classList.contains('resize-handle-corner-ne')) d='ne';
+      else if(h.classList.contains('resize-handle-corner-nw')) d='nw';
+      if(!d) return;
+      h.addEventListener('mousedown',e=>{
+        if(isAnyDragging) return; e.preventDefault(); e.stopPropagation();
+        res=true; isAnyResizing=true; dir=d; sx=e.clientX; sy=e.clientY;
+        const r=panel.getBoundingClientRect(); sw=r.width; sh=r.height; sl=r.left; st=r.top;
+        document.body.style.userSelect='none'; bringToFront(panel);
+      });
+    });
+    document.addEventListener('mousemove',e=>{
+      if(!res||isAnyDragging) return; e.preventDefault();
+      const dx=e.clientX-sx,dy=e.clientY-sy;
+      let nW=sw,nH=sh,nL=sl,nT=st;
+      if(dir==='right'||dir==='ne'||dir==='se') nW=sw+dx;
+      if(dir==='left'||dir==='nw'||dir==='sw')  { nW=sw-dx; nL=sl+dx; }
+      if(dir==='bottom'||dir==='sw'||dir==='se') nH=sh+dy;
+      if(dir==='top'||dir==='nw'||dir==='ne')    { nH=sh-dy; nT=st+dy; }
+      nW=Math.max(MIN_W,Math.min(MAX_W,nW)); nH=Math.max(MIN_H,Math.min(MAX_H,nH));
+      if(dir!=='top'&&dir!=='bottom'){ panel.style.width=nW+'px'; panel.style.left=nL+'px'; }
+      if(dir!=='left'&&dir!=='right'){ panel.style.height=nH+'px'; panel.style.maxHeight=nH+'px'; panel.style.top=nT+'px'; }
+    });
+    document.addEventListener('mouseup',()=>{ if(res){ res=false; isAnyResizing=false; dir=null; document.body.style.userSelect=''; } });
+  });
+}
+
+/* ━━ CANVAS PAN/ZOOM ━━ */
+function initPan(){
+  const ws=document.getElementById('canvasWorkspace'),cc=document.getElementById('canvasContent');
+  let pan=false,sx,sy,tx=0,ty=0,sc=1;
+  ws.addEventListener('contextmenu',e=>e.preventDefault());
+  ws.addEventListener('mousedown',e=>{ if(e.button===2){ e.preventDefault(); pan=true; sx=e.clientX-tx; sy=e.clientY-ty; ws.classList.add('panning'); } });
+  ws.addEventListener('mousemove',e=>{ if(!pan) return; e.preventDefault(); tx=Math.max(-1000,Math.min(1000,e.clientX-sx)); ty=Math.max(-1000,Math.min(1000,e.clientY-sy)); upTf(); });
+  ws.addEventListener('mouseup',e=>{ if(e.button===2){ pan=false; ws.classList.remove('panning'); } });
+  ws.addEventListener('mouseleave',()=>{ if(pan){ pan=false; ws.classList.remove('panning'); } });
+  ws.addEventListener('wheel',e=>{ e.preventDefault(); sc=Math.max(.4,Math.min(3,sc*(e.deltaY>0?.95:1.05))); upTf(); },{passive:false});
+  ws.addEventListener('dblclick',()=>{ tx=0;ty=0;sc=1; upTf(); });
+  function upTf(){ cc.style.transform=`translate(${tx}px,${ty}px) scale(${sc})`; }
+}
+
+/* ━━ INIT ━━ */
+document.addEventListener('DOMContentLoaded',()=>{
+  renderDynamicFields(_currentType);
+  loadFromLaunch();
+  generateQR(false);
+  initDraggable();
+  initPan();
+  openPanel('panelContent');
+  updateStatus();
+});
+</script>
+</body>
+</html>
