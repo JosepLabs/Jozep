@@ -1,0 +1,2313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexa - Editor</title>
+    <!-- Paper fonts (kept for paper styles) -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500;600&family=Playfair+Display:wght@400;700;900&family=Merriweather:wght@400;700&family=Oswald:wght@400;600&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="icon" href="favicon.png">
+
+    <style>
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           TOKENS — espejados desde index.html
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        :root {
+            /* Superficies */
+            --bg:           #f5f6f8;
+            --surface:      #ffffff;
+            --surface-2:    #f9fafb;
+
+            /* Bordes */
+            --border:       #e8eaed;
+            --border-2:     #f0f1f3;
+
+            /* Texto */
+            --text-primary:   #0f1117;
+            --text-secondary: #5c6370;
+            --text-tertiary:  #9ba3af;
+
+            /* Dark chrome (mismo que sidebar de index) */
+            --chrome-bg:        #0d1117;
+            --chrome-border:    rgba(255, 255, 255, 0.06);
+            --chrome-accent:    rgba(255, 255, 255, 0.05);
+
+            /* Colores semánticos */
+            --blue:         #2563eb;
+            --blue-dark:    #1e40af;
+            --blue-soft:    #eff6ff;
+            --blue-border:  #bfdbfe;
+
+            --green:        #16a34a;
+            --green-soft:   #f0fdf4;
+            --green-border: #bbf7d0;
+
+            --amber:        #d97706;
+            --amber-soft:   #fffbeb;
+            --amber-border: #fde68a;
+
+            --red:          #dc2626;
+            --red-soft:     #fef2f2;
+            --red-border:   #fecaca;
+
+            --violet:       #7c3aed;
+            --violet-soft:  #f5f3ff;
+
+            /* Radios */
+            --radius-sm:  6px;
+            --radius:     10px;
+            --radius-lg:  14px;
+            --radius-xl:  18px;
+
+            /* Sombras */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow:    0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+
+            /* Paper (sin cambio, solo para el canvas) */
+            --carta-width:  816px;
+            --carta-height: 1056px;
+            --oficio-width:  816px;
+            --oficio-height: 1344px;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           RESET + BASE
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button { font-family: inherit; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           TOOLBAR — mismo chrome oscuro que sidebar de index
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .main-toolbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 54px;
+            background: var(--chrome-bg);
+            border-bottom: 1px solid var(--chrome-border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 8px;
+            z-index: 1000;
+            /* mismo ruido sutil que el sidebar de index */
+        }
+
+        /* Back + Logo */
+        .toolbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 5px 10px 5px 5px;
+            transition: background 0.13s;
+            margin-right: 4px;
+            text-decoration: none;
+        }
+
+        .toolbar-brand:hover { background: var(--chrome-accent); }
+
+        .toolbar-back-arrow {
+            width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            color: rgba(255, 255, 255, 0.3);
+            transition: color 0.13s;
+            flex-shrink: 0;
+        }
+
+        .toolbar-brand:hover .toolbar-back-arrow { color: rgba(255, 255, 255, 0.7); }
+
+        .toolbar-logo {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            background: linear-gradient(110deg, #60a5fa 0%, #f5b30c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 28px;
+            background: var(--chrome-border);
+        }
+
+        /* Botones de herramientas — estilo "nav-item" del index */
+        .toolbar-btn {
+            height: 32px;
+            padding: 0 13px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.55);
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.13s, background 0.13s, border-color 0.13s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'DM Sans', inherit;
+            white-space: nowrap;
+            letter-spacing: 0.1px;
+        }
+
+        .toolbar-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+        .toolbar-btn:hover {
+            background: var(--chrome-accent);
+            border-color: rgba(255, 255, 255, 0.18);
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Generar — azul suave como active nav-item */
+        .toolbar-btn.success {
+            background: rgba(22, 163, 74, 0.12);
+            border-color: rgba(22, 163, 74, 0.3);
+            color: #6ee7b7;
+        }
+
+        .toolbar-btn.success:hover {
+            background: var(--green);
+            border-color: var(--green);
+            color: white;
+        }
+
+        /* Guardar — verde suave */
+        .toolbar-btn.save {
+            background: rgba(37, 99, 235, 0.12);
+            border-color: rgba(37, 99, 235, 0.3);
+            color: #93c5fd;
+        }
+
+        .toolbar-btn.save:hover {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: white;
+        }
+
+        /* PDF — degradado dorado como logo */
+        .toolbar-btn.primary {
+            background: rgba(245, 179, 12, 0.1);
+            border-color: rgba(245, 179, 12, 0.28);
+            color: #fcd34d;
+        }
+
+        .toolbar-btn.primary:hover {
+            background: rgba(245, 179, 12, 0.22);
+            border-color: rgba(245, 179, 12, 0.5);
+            color: #fef3c7;
+        }
+
+        .toolbar-spacer { flex: 1; }
+
+        .toolbar-info {
+            font-size: 11.5px;
+            color: rgba(255, 255, 255, 0.35);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .toolbar-info-item { display: flex; align-items: center; gap: 5px; }
+        .toolbar-info-label { color: rgba(255, 255, 255, 0.25); }
+        .toolbar-info-value { color: rgba(255, 255, 255, 0.7); font-weight: 600; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           FOOTER — mismo chrome
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .mini-footer {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 30px;
+            background: var(--chrome-bg);
+            border-top: 1px solid var(--chrome-border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 1000;
+        }
+
+        .footer-text {
+            font-size: 10.5px;
+            color: rgba(255, 255, 255, 0.22);
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           CANVAS WORKSPACE
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .canvas-workspace {
+            position: fixed;
+            top: 54px; left: 0; right: 0; bottom: 30px;
+            overflow: hidden;
+            background: var(--bg);
+            background-image:
+                repeating-linear-gradient(0deg,  transparent, transparent 19px, rgba(0,0,0,0.025) 19px, rgba(0,0,0,0.025) 20px),
+                repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.025) 19px, rgba(0,0,0,0.025) 20px);
+            cursor: default;
+        }
+
+        .canvas-workspace.panning { cursor: grabbing; }
+
+        .canvas-content {
+            position: relative;
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            will-change: transform;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           PAPER — sin cambios visuales
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .paper {
+            background: white;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0,0,0,0.04);
+            position: relative;
+            transition: transform 0.3s ease;
+            transform-origin: center center;
+        }
+
+        .paper.carta  { width: var(--carta-width);  height: var(--carta-height); }
+        .paper.oficio { width: var(--oficio-width); height: var(--oficio-height); }
+
+        .paper-content {
+            padding: 40px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .paper-header {
+            text-align: center;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .paper-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .paper-subtitle { font-size: 1rem; color: #7f8c8d; font-style: italic; }
+
+        .font-playfair     { font-family: 'Playfair Display', serif; }
+        .font-merriweather { font-family: 'Merriweather', serif; }
+        .font-oswald       { font-family: 'Oswald', sans-serif; }
+        .font-inter        { font-family: 'DM Sans', sans-serif; }
+
+        .border-simple  { border-bottom: 3px solid #000; padding-bottom: 15px; }
+        .border-double  { border-bottom: 6px double #000; padding-bottom: 15px; }
+        .border-gradient { position: relative; padding-bottom: 15px; }
+        .border-gradient::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #9b59b6);
+        }
+
+        .grid-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1 1 auto;
+            min-height: 0;
+            margin: 15px 0;
+        }
+
+        .puzzle-grid {
+            display: grid;
+            gap: 2px;
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 4px;
+            width: fit-content;
+        }
+
+        .grid-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #bdc3c7;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 700;
+            cursor: default;
+            transition: all 0.2s;
+            user-select: none;
+            text-transform: uppercase;
+            aspect-ratio: 1 / 1;
+            flex-shrink: 0;
+        }
+
+        .grid-cell.word-placed { background: #d5f4e6; animation: placeWord 0.3s ease; }
+
+        @keyframes placeWord {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.2); background: #27ae60; color: white; }
+            100% { transform: scale(1); }
+        }
+
+        .style-classic .grid-cell { border-radius: 0; border: 1px solid #bdc3c7; }
+        .style-modern  .grid-cell { border-radius: 6px; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .style-minimal .grid-cell { border: none; background: transparent; }
+
+        .words-section { margin-top: 15px; flex-shrink: 0; }
+
+        .words-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .words-list { display: grid; gap: 6px; list-style: none; padding: 0; }
+        .words-list.cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .words-list.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .words-list.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+        .word-item {
+            padding: 6px 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .word-item.found { text-decoration: line-through; opacity: 0.5; }
+        .word-checkbox { width: 14px; height: 14px; flex-shrink: 0; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           PANELES FLOTANTES — mismo lenguaje que
+           las cards/surfaces del index.html
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .floating-panel {
+            position: fixed;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);   /* 14px, igual que .diff-card */
+            box-shadow: var(--shadow-lg);
+            display: none;
+            flex-direction: column;
+            min-width: 320px;
+            max-width: 800px;
+            width: 400px;
+            height: auto;
+            max-height: calc(100vh - 104px);
+            z-index: 100;
+            overflow: hidden;                  /* clip para que el header respete el radio */
+        }
+
+        .floating-panel.active { display: flex; }
+
+        .floating-panel.minimized { height: 44px !important; max-height: 44px !important; overflow: hidden; }
+        .floating-panel.minimized .panel-content { display: none; }
+        .floating-panel.minimized .resize-handle { display: none; }
+
+        /* Resize handles */
+        .resize-handle { position: absolute; background: transparent; z-index: 10; }
+        .resize-handle-right  { top:0; right:-4px; width:12px; height:100%; cursor:ew-resize; }
+        .resize-handle-left   { top:0; left:-4px;  width:12px; height:100%; cursor:ew-resize; }
+        .resize-handle-bottom { bottom:-4px; left:0; width:100%; height:12px; cursor:ns-resize; }
+        .resize-handle-top    { top:-4px; left:0;   width:100%; height:12px; cursor:ns-resize; }
+        .resize-handle-corner { width:24px; height:24px; }
+        .resize-handle-corner-se { bottom:-4px; right:-4px; cursor:nwse-resize; }
+        .resize-handle-corner-sw { bottom:-4px; left:-4px;  cursor:nesw-resize; }
+        .resize-handle-corner-ne { top:-4px;    right:-4px; cursor:nesw-resize; }
+        .resize-handle-corner-nw { top:-4px;    left:-4px;  cursor:nwse-resize; }
+
+        /* Indicadores de esquina */
+        .resize-handle-corner::after {
+            content: '';
+            position: absolute;
+            width: 10px; height: 10px;
+            opacity: 0;
+            transition: opacity 0.18s;
+        }
+        .resize-handle-corner-se::after { bottom:5px; right:5px; border-right:2px solid var(--border); border-bottom:2px solid var(--border); }
+        .resize-handle-corner-sw::after { bottom:5px; left:5px;  border-left:2px solid var(--border);  border-bottom:2px solid var(--border); }
+        .resize-handle-corner-ne::after { top:5px;    right:5px; border-right:2px solid var(--border); border-top:2px solid var(--border); }
+        .resize-handle-corner-nw::after { top:5px;    left:5px;  border-left:2px solid var(--border);  border-top:2px solid var(--border); }
+        .resize-handle-corner:hover::after { opacity:1; border-color: var(--blue); }
+
+        /* Panel header — mismo tratamiento que .settings-section-title del index */
+        .panel-header {
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border-2);
+            padding: 11px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: move;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .panel-title {
+            flex: 1;
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-tertiary);
+        }
+
+        .panel-controls { display: flex; gap: 3px; }
+
+        .panel-btn {
+            width: 22px; height: 22px;
+            border: none;
+            background: transparent;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; line-height: 1;
+            transition: background 0.12s, color 0.12s;
+        }
+
+        .panel-btn:hover { background: var(--border-2); color: var(--text-primary); }
+
+        /* Panel content */
+        .panel-content {
+            padding: 18px 18px 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .panel-content::-webkit-scrollbar { width: 5px; }
+        .panel-content::-webkit-scrollbar-track { background: transparent; }
+        .panel-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .panel-content::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           FORMULARIOS — espejados de index.html
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .form-group { margin-bottom: 18px; }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);      /* 10px */
+            font-family: 'DM Sans', inherit;
+            font-size: 13.5px;
+            color: var(--text-primary);
+            background: var(--surface);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        .form-help {
+            font-size: 11.5px;
+            color: var(--text-tertiary);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .input-group { display: flex; gap: 8px; align-items: center; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           BOTONES — espejados de index.html
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .btn {
+            padding: 9px 16px;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 13px;
+            display: inline-flex; align-items: center; gap: 7px;
+            justify-content: center;
+            font-family: 'DM Sans', inherit;
+            letter-spacing: 0.1px;
+        }
+
+        .btn svg { width: 13px; height: 13px; }
+
+        .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+        .btn:active { transform: translateY(0); box-shadow: none; }
+
+        .btn-primary   { background: var(--blue);  color: white; }
+        .btn-primary:hover { background: var(--blue-dark); }
+
+        .btn-success   { background: var(--green); color: white; }
+        .btn-success:hover { background: #15803d; }
+
+        .btn-danger    { background: var(--red-soft); color: var(--red); border: 1px solid var(--red-border); }
+        .btn-danger:hover  { background: var(--red); color: white; border-color: var(--red); transform: translateY(-1px); }
+
+        .btn-warning   { background: var(--amber-soft); color: var(--amber); border: 1px solid var(--amber-border); }
+        .btn-warning:hover { background: var(--amber); color: white; }
+
+        .btn-secondary {
+            background: var(--surface-2);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: var(--border-2); color: var(--text-primary); border-color: #d1d5db; }
+
+        .btn-block { width: 100%; }
+        .btn-sm    { padding: 6px 12px; font-size: 12px; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           WORD TAGS — colores del sistema
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .word-tag-container {
+            display: flex; flex-wrap: wrap; gap: 5px;
+            min-height: 56px; padding: 10px 12px;
+            background: var(--surface-2);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .word-tag {
+            background: var(--blue-soft);
+            color: #1d4ed8;
+            border: 1px solid var(--blue-border);
+            padding: 5px 11px;
+            border-radius: 99px;
+            font-size: 11.5px;
+            font-weight: 600;
+            display: inline-flex; align-items: center; gap: 5px;
+            animation: tagAppear 0.18s ease;
+            letter-spacing: 0.2px;
+        }
+
+        @keyframes tagAppear {
+            from { transform: scale(0.85); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+
+        .word-tag.placed {
+            background: var(--green-soft);
+            color: var(--green);
+            border-color: var(--green-border);
+        }
+
+        .word-tag.failed {
+            background: var(--red-soft);
+            color: var(--red);
+            border-color: var(--red-border);
+        }
+
+        .word-tag-remove {
+            cursor: pointer;
+            font-weight: 700;
+            opacity: 0.6;
+            font-size: 13px;
+            line-height: 1;
+            transition: opacity 0.12s;
+        }
+        .word-tag-remove:hover { opacity: 1; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           PROGRESS BAR — tokens del sistema
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .progress-container { margin: 14px 0; }
+
+        .progress-label {
+            display: flex; justify-content: space-between;
+            margin-bottom: 7px;
+            font-size: 12px; font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            height: 5px;
+            background: var(--border);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), #8b5cf6);
+            transition: width 0.5s ease;
+            border-radius: 99px;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           RESULT LOG — dark surface refinada
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .result-log {
+            background: var(--chrome-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 11px 13px;
+            max-height: 180px;
+            overflow-y: auto;
+            font-size: 11px;
+            font-family: 'DM Mono', monospace;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.7;
+        }
+
+        .result-log::-webkit-scrollbar { width: 4px; }
+        .result-log::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        .log-entry { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .log-entry:last-child { border-bottom: none; }
+        .log-entry.success { color: #6ee7b7; }
+        .log-entry.error   { color: #fca5a5; }
+        .log-entry.info    { color: #93c5fd; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           CHECKBOXES
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .checkbox-group { display: flex; flex-direction: column; gap: 5px; }
+
+        .checkbox-label {
+            display: flex; align-items: center; gap: 9px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: var(--radius-sm);
+            transition: background 0.12s, color 0.12s;
+        }
+
+        .checkbox-label:hover { background: var(--surface-2); color: var(--text-primary); }
+        .checkbox-label input[type="checkbox"] { cursor: pointer; accent-color: var(--blue); }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           RANGE SLIDER
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .range-group { display: flex; align-items: center; gap: 12px; }
+
+        input[type="range"] {
+            flex: 1; height: 4px; border-radius: 99px;
+            outline: none; -webkit-appearance: none;
+            background: var(--border); cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: var(--blue);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--blue); cursor: pointer; border: none;
+        }
+
+        .range-value {
+            min-width: 46px; text-align: center;
+            font-weight: 700;
+            color: var(--blue);
+            font-size: 12.5px;
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           COLOR PICKER
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .color-picker-group { display: flex; gap: 12px; align-items: center; }
+        .color-picker-item  { flex: 1; }
+        .color-picker-item label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: block;
+        }
+        input[type="color"] {
+            width: 100%; height: 40px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            padding: 3px;
+            background: var(--surface);
+        }
+
+        /* Divider */
+        .divider { height: 1px; background: var(--border-2); margin: 16px 0; }
+
+        /* Warning notice — amber suave del sistema */
+        .warning-message {
+            background: var(--amber-soft);
+            border: 1px solid var(--amber-border);
+            border-radius: var(--radius);
+            padding: 11px 14px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: #78350f;
+            line-height: 1.55;
+        }
+
+        .warning-message strong {
+            display: block;
+            margin-bottom: 3px;
+            color: #6b2d00;
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           MODAL
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .modal {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 17, 23, 0.5);
+            backdrop-filter: blur(3px);
+            z-index: 2000;
+            justify-content: center; align-items: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            max-width: 560px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: modalAppear 0.22s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        @keyframes modalAppear {
+            from { transform: scale(0.94) translateY(8px); opacity: 0; }
+            to   { transform: scale(1)    translateY(0);   opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 22px; padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-2);
+        }
+
+        .modal-title {
+            font-size: 16px; font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .modal-close {
+            background: none; border: none;
+            font-size: 20px; cursor: pointer;
+            color: var(--text-tertiary);
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: var(--radius-sm);
+            transition: background 0.12s, color 0.12s;
+        }
+
+        .modal-close:hover { background: var(--surface-2); color: var(--text-primary); }
+
+        /* Upload zone */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            background: var(--surface-2);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--blue);
+            background: var(--blue-soft);
+        }
+
+        .upload-icon {
+            margin-bottom: 14px;
+            color: var(--text-tertiary);
+        }
+
+        /* Spinner */
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--blue);
+            border-radius: 50%;
+            width: 36px; height: 36px;
+            animation: spin 0.9s linear infinite;
+            margin: 16px auto;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           TOAST DEL EDITOR — mismo del index
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .editor-toast {
+            position: fixed;
+            bottom: 42px; left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--text-primary);
+            color: white;
+            padding: 10px 18px;
+            border-radius: var(--radius);
+            font-size: 13px; font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+            pointer-events: none;
+            z-index: 3000;
+            white-space: nowrap;
+            box-shadow: var(--shadow-lg);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .editor-toast::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            flex-shrink: 0;
+        }
+
+        .editor-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           RESPONSIVE
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        @media (max-width: 768px) {
+            .floating-panel { max-width: calc(100vw - 24px); }
+            .toolbar-info { display: none; }
+        }
+
+        @media (max-width: 1200px) {
+            .toolbar-btn { padding: 0 9px; font-size: 11.5px; }
+            .toolbar-divider { display: none; }
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           PRINT
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        @media print {
+            body { background: white; overflow: visible; }
+            .main-toolbar, .mini-footer, .floating-panel, .modal { display: none !important; }
+            .canvas-workspace { position: static; overflow: visible; background: white; }
+            .canvas-content { padding: 0; transform: none !important; }
+            .paper { box-shadow: none; margin: 0; transform: none !important; }
+            .paper.carta  { width: 21.59cm; height: 27.94cm; }
+            .paper.oficio { width: 21.59cm; height: 35.56cm; }
+            .grid-cell { border: 0.5px solid #999; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .border-gradient::after { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @page { margin: 0; size: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOOLBAR SUPERIOR -->
+    <div class="main-toolbar">
+
+        <!-- Logo + flecha de regreso -->
+        <div class="toolbar-brand" onclick="goToMenu()" title="Volver al menú">
+            <div class="toolbar-back-arrow">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13L5 8l5-5"/>
+                </svg>
+            </div>
+            <div class="toolbar-logo">LEXA</div>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <button class="toolbar-btn" onclick="togglePanel('panelWords')">Lista de Palabras</button>
+        <button class="toolbar-btn" onclick="togglePanel('panelStyle')">Estilo de Título</button>
+        <button class="toolbar-btn" onclick="togglePanel('panelGrid')">Ajustes de Grilla</button>
+        <button class="toolbar-btn" onclick="togglePanel('panelPage')">Configuración</button>
+        <button class="toolbar-btn" onclick="togglePanel('panelImport')">Importar/Exportar</button>
+
+        <div class="toolbar-divider"></div>
+
+        <button class="toolbar-btn success" onclick="generatePuzzleWithWords()">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 7h10M7 2l5 5-5 5"/>
+            </svg>
+            Generar Sopa
+        </button>
+
+        <button class="toolbar-btn save" onclick="saveToIndex()">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 13H3a1 1 0 01-1-1V2a1 1 0 011-1h6.5L13 4.5V12a1 1 0 01-1 1z"/>
+                <path d="M9 1v4H4"/>
+                <path d="M4 8h6M4 10.5h4"/>
+            </svg>
+            Guardar
+        </button>
+
+        <button class="toolbar-btn primary" onclick="savePDF()">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 10v2a1 1 0 001 1h8a1 1 0 001-1v-2"/>
+                <path d="M7 1v8M4 6l3 3 3-3"/>
+            </svg>
+            Guardar PDF
+        </button>
+
+        <div class="toolbar-spacer"></div>
+
+        <div class="toolbar-info">
+            <div class="toolbar-info-item">
+                <span class="toolbar-info-label">Tamaño</span>
+                <span class="toolbar-info-value" id="statusSize">15×15</span>
+            </div>
+            <div class="toolbar-info-item">
+                <span class="toolbar-info-label">Palabras</span>
+                <span class="toolbar-info-value" id="statusWords">0</span>
+            </div>
+            <div class="toolbar-info-item">
+                <span class="toolbar-info-label">Colocadas</span>
+                <span class="toolbar-info-value" id="statusPlaced">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CANVAS WORKSPACE -->
+    <div class="canvas-workspace" id="canvasWorkspace">
+        <div class="canvas-content">
+            <div class="paper carta" id="paper">
+                <div class="paper-content">
+                    <div class="paper-header border-simple" id="paperHeader">
+                        <h1 class="paper-title font-playfair" id="paperTitle">SOPA DE LETRAS</h1>
+                        <p class="paper-subtitle" id="paperSubtitle"></p>
+                    </div>
+                    <div class="grid-wrapper">
+                        <div class="puzzle-grid style-classic" id="puzzleGrid"></div>
+                    </div>
+                    <div class="words-section">
+                        <h3 class="words-title">PALABRAS A BUSCAR</h3>
+                        <ul class="words-list cols-3" id="wordsListDisplay"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL: LISTA DE PALABRAS -->
+    <div class="floating-panel" id="panelWords" style="left:40px;top:80px;">
+        <div class="panel-header" data-panel="panelWords">
+            <span class="panel-title">Lista de Palabras</span>
+            <div class="panel-controls">
+                <button class="panel-btn" onclick="minimizePanel('panelWords')" title="Minimizar">−</button>
+                <button class="panel-btn" onclick="closePanel('panelWords')" title="Cerrar">×</button>
+            </div>
+        </div>
+        <div class="panel-content">
+            <div class="warning-message">
+                <strong>Límite por Columnas</strong>
+                2 col = 20 · 3 col = 30 · 4 col = 40 palabras máx.
+            </div>
+            <div class="form-group">
+                <label class="form-label">Palabras <span style="color:var(--text-tertiary);font-weight:400">(una por línea)</span></label>
+                <textarea class="form-textarea" id="wordsList" placeholder="EJEMPLO&#10;PALABRA&#10;SOPA&#10;LETRAS" oninput="updateWordTags()"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Palabras agregadas <span id="wordCount" style="color:var(--blue);font-family:'DM Mono',monospace;font-size:11px;">0</span></label>
+                <div class="word-tag-container" id="wordTags">
+                    <div style="color:var(--text-tertiary);font-size:12px;">Las palabras aparecerán aquí…</div>
+                </div>
+            </div>
+            <button class="btn btn-success btn-block" onclick="generatePuzzleWithWords()">Generar Sopa</button>
+            <div class="btn-group" style="margin-top:10px;">
+                <button class="btn btn-secondary btn-sm" onclick="sortWords()">Ordenar A–Z</button>
+                <button class="btn btn-secondary btn-sm" onclick="clearAllWords()">Borrar Todo</button>
+            </div>
+            <div id="placementProgress" style="display:none;margin-top:14px;">
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Colocando palabras…</span>
+                        <span id="progressText">0/0</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+                </div>
+            </div>
+            <div id="resultLogContainer" style="display:none;margin-top:14px;">
+                <label class="form-label">Resultado</label>
+                <div class="result-log" id="resultLog"></div>
+            </div>
+            <div class="divider"></div>
+            <div class="form-group">
+                <label class="form-label">Direcciones permitidas</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label"><input type="checkbox" id="dirHorizontal" checked> Horizontal</label>
+                    <label class="checkbox-label"><input type="checkbox" id="dirVertical" checked> Vertical</label>
+                    <label class="checkbox-label"><input type="checkbox" id="dirDiagonal" checked> Diagonal</label>
+                    <label class="checkbox-label"><input type="checkbox" id="dirReverse"> Invertidas</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Columnas en lista</label>
+                <select class="form-select" id="wordColumns" onchange="updateWordColumns()">
+                    <option value="2">2 columnas (máx 20)</option>
+                    <option value="3" selected>3 columnas (máx 30)</option>
+                    <option value="4">4 columnas (máx 40)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="showCheckboxes" onchange="toggleCheckboxes()">
+                    Mostrar casillas de verificación
+                </label>
+            </div>
+        </div>
+        <div class="resize-handle resize-handle-top"></div>
+        <div class="resize-handle resize-handle-right"></div>
+        <div class="resize-handle resize-handle-bottom"></div>
+        <div class="resize-handle resize-handle-left"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-nw"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-ne"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-sw"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-se"></div>
+    </div>
+
+    <!-- PANEL: ESTILO DE TÍTULO -->
+    <div class="floating-panel" id="panelStyle" style="right:40px;top:80px;">
+        <div class="panel-header" data-panel="panelStyle">
+            <span class="panel-title">Estilo de Título</span>
+            <div class="panel-controls">
+                <button class="panel-btn" onclick="minimizePanel('panelStyle')" title="Minimizar">−</button>
+                <button class="panel-btn" onclick="closePanel('panelStyle')" title="Cerrar">×</button>
+            </div>
+        </div>
+        <div class="panel-content">
+            <div class="form-group">
+                <label class="form-label">Título principal</label>
+                <input type="text" class="form-input" id="mainTitle" value="SOPA DE LETRAS" oninput="updateTitle()">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Subtítulo <span style="color:var(--text-tertiary);font-weight:400">(opcional)</span></label>
+                <input type="text" class="form-input" id="subtitle" placeholder="Tema o descripción" oninput="updateSubtitle()">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Fuente del título</label>
+                <select class="form-select" id="titleFont" onchange="changeTitleFont()">
+                    <option value="playfair">Playfair Display</option>
+                    <option value="merriweather">Merriweather</option>
+                    <option value="oswald">Oswald</option>
+                    <option value="inter">DM Sans</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Estilo de borde</label>
+                <select class="form-select" id="borderStyle" onchange="changeBorderStyle()">
+                    <option value="simple">Simple</option>
+                    <option value="double">Doble</option>
+                    <option value="gradient">Degradado</option>
+                    <option value="none">Sin borde</option>
+                </select>
+            </div>
+            <div class="form-group" id="gradientColorsSection" style="display:none;">
+                <label class="form-label">Colores del degradado</label>
+                <div class="color-picker-group">
+                    <div class="color-picker-item">
+                        <label>Inicio</label>
+                        <input type="color" id="gradientColor1" value="#3498db" onchange="updateGradientColors()">
+                    </div>
+                    <div class="color-picker-item">
+                        <label>Final</label>
+                        <input type="color" id="gradientColor2" value="#9b59b6" onchange="updateGradientColors()">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="resize-handle resize-handle-top"></div>
+        <div class="resize-handle resize-handle-right"></div>
+        <div class="resize-handle resize-handle-bottom"></div>
+        <div class="resize-handle resize-handle-left"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-nw"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-ne"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-sw"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-se"></div>
+    </div>
+
+    <!-- PANEL: AJUSTES DE GRILLA -->
+    <div class="floating-panel" id="panelGrid" style="left:40px;top:240px;">
+        <div class="panel-header" data-panel="panelGrid">
+            <span class="panel-title">Ajustes de Grilla</span>
+            <div class="panel-controls">
+                <button class="panel-btn" onclick="minimizePanel('panelGrid')" title="Minimizar">−</button>
+                <button class="panel-btn" onclick="closePanel('panelGrid')" title="Cerrar">×</button>
+            </div>
+        </div>
+        <div class="panel-content">
+            <div class="warning-message">
+                <strong>Tamaño automático</strong>
+                La grilla se adapta a los márgenes. Máximo 30×30.
+            </div>
+            <div class="form-group">
+                <label class="form-label">Dimensiones <span style="color:var(--text-tertiary);font-weight:400">(máx 30×30)</span></label>
+                <div class="input-group">
+                    <input type="number" class="form-input" id="gridRows" value="15" min="5" max="30">
+                    <span style="color:var(--text-tertiary);font-weight:600;">×</span>
+                    <input type="number" class="form-input" id="gridCols" value="15" min="5" max="30">
+                </div>
+                <div class="form-help">Las celdas se ajustan al espacio disponible.</div>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="generateGrid()">Regenerar Grilla</button>
+            <div class="divider"></div>
+            <div class="form-group">
+                <label class="form-label">Estilo de grilla</label>
+                <select class="form-select" id="gridStyle" onchange="changeGridStyle()">
+                    <option value="classic">Clásico</option>
+                    <option value="modern">Moderno</option>
+                    <option value="minimal">Minimalista</option>
+                </select>
+            </div>
+        </div>
+        <div class="resize-handle resize-handle-top"></div>
+        <div class="resize-handle resize-handle-right"></div>
+        <div class="resize-handle resize-handle-bottom"></div>
+        <div class="resize-handle resize-handle-left"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-nw"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-ne"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-sw"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-se"></div>
+    </div>
+
+    <!-- PANEL: CONFIGURACIÓN DE PÁGINA -->
+    <div class="floating-panel" id="panelPage" style="right:40px;top:260px;">
+        <div class="panel-header" data-panel="panelPage">
+            <span class="panel-title">Configuración de Página</span>
+            <div class="panel-controls">
+                <button class="panel-btn" onclick="minimizePanel('panelPage')" title="Minimizar">−</button>
+                <button class="panel-btn" onclick="closePanel('panelPage')" title="Cerrar">×</button>
+            </div>
+        </div>
+        <div class="panel-content">
+            <div class="form-group">
+                <label class="form-label">Tamaño de página</label>
+                <select class="form-select" id="pageSize" onchange="changePageSize()">
+                    <option value="carta">Carta (21.59 × 27.94 cm)</option>
+                    <option value="oficio">Oficio (21.59 × 35.56 cm)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Márgenes</label>
+                <div class="range-group">
+                    <input type="range" id="margin" min="20" max="80" value="40" step="5" oninput="updateMargins()">
+                    <span class="range-value" id="marginValue">40px</span>
+                </div>
+                <div class="form-help">La grilla y las palabras se adaptan automáticamente.</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Zoom de vista</label>
+                <div class="range-group">
+                    <input type="range" id="zoomLevel" min="50" max="150" value="100" oninput="updateZoom()">
+                    <span class="range-value" id="zoomValue">100%</span>
+                </div>
+                <div class="form-help">Solo para visualización; no afecta el PDF.</div>
+            </div>
+            <div class="divider"></div>
+            <button class="btn btn-primary btn-block" onclick="savePDF()">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 10v2a1 1 0 001 1h8a1 1 0 001-1v-2"/>
+                    <path d="M7 1v8M4 6l3 3 3-3"/>
+                </svg>
+                Guardar PDF
+            </button>
+        </div>
+        <div class="resize-handle resize-handle-top"></div>
+        <div class="resize-handle resize-handle-right"></div>
+        <div class="resize-handle resize-handle-bottom"></div>
+        <div class="resize-handle resize-handle-left"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-nw"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-ne"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-sw"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-se"></div>
+    </div>
+
+    <!-- PANEL: IMPORTAR/EXPORTAR -->
+    <div class="floating-panel" id="panelImport" style="left:calc(50% - 200px);top:80px;">
+        <div class="panel-header" data-panel="panelImport">
+            <span class="panel-title">Importar / Exportar</span>
+            <div class="panel-controls">
+                <button class="panel-btn" onclick="minimizePanel('panelImport')" title="Minimizar">−</button>
+                <button class="panel-btn" onclick="closePanel('panelImport')" title="Cerrar">×</button>
+            </div>
+        </div>
+        <div class="panel-content">
+            <div class="form-group">
+                <label class="form-label">Desde imagen (OCR)</label>
+                <button class="btn btn-primary btn-block" onclick="openImportModal()">Importar desde Imagen</button>
+                <div class="form-help">Extrae palabras automáticamente usando OCR.</div>
+            </div>
+            <div class="divider"></div>
+            <div class="form-group">
+                <label class="form-label">Guardar / Cargar proyecto</label>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="saveProject()">Guardar local</button>
+                    <button class="btn btn-secondary" onclick="loadProject()">Cargar local</button>
+                </div>
+                <div class="form-help">Una ranura — sobrescribe al guardar.</div>
+            </div>
+            <div class="divider"></div>
+            <div class="form-group">
+                <label class="form-label">Exportar / Importar JSON</label>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="exportAsJSON()">Exportar</button>
+                    <button class="btn btn-secondary" onclick="importFromJSON()">Importar</button>
+                </div>
+                <div class="form-help">Archivo JSON descargable.</div>
+            </div>
+            <div class="divider"></div>
+            <button class="btn btn-danger btn-block" onclick="resetAll()">Resetear Todo</button>
+            <div class="form-help" style="color:var(--red);text-align:center;margin-top:6px;">Esto borrará toda la configuración actual.</div>
+        </div>
+        <div class="resize-handle resize-handle-top"></div>
+        <div class="resize-handle resize-handle-right"></div>
+        <div class="resize-handle resize-handle-bottom"></div>
+        <div class="resize-handle resize-handle-left"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-nw"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-ne"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-sw"></div>
+        <div class="resize-handle resize-handle-corner resize-handle-corner-se"></div>
+    </div>
+
+    <!-- MODAL: IMPORTAR IMAGEN -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Importar desde Imagen (OCR)</h2>
+                <button class="modal-close" onclick="closeModal('importModal')">×</button>
+            </div>
+            <div class="upload-zone" onclick="document.getElementById('imageInput').click()">
+                <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+                <div class="upload-icon">
+                    <svg width="44" height="44" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="8" width="40" height="32" rx="4"/>
+                        <circle cx="16" cy="20" r="4"/>
+                        <path d="M4 36l10-10 6 6 8-10 16 14"/>
+                    </svg>
+                </div>
+                <p style="font-weight:600;margin-bottom:6px;color:var(--text-primary);">Arrastra una imagen aquí o haz clic</p>
+                <p style="font-size:12.5px;color:var(--text-tertiary);">JPG, PNG — procesamiento OCR automático</p>
+            </div>
+            <div id="ocrStatus" style="margin-top:18px;"></div>
+            <button class="btn btn-primary btn-block" onclick="document.getElementById('imageInput').click()" style="margin-top:16px;">
+                Seleccionar Imagen
+            </button>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="editor-toast" id="editorToast"></div>
+
+    <!-- FOOTER -->
+    <div class="mini-footer">
+        <div class="footer-text">HechoPorJosep</div>
+        <div class="toolbar-spacer"></div>
+        <div class="footer-text">v3.5.3</div>
+    </div>
+
+    <script>
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           ESTADO GLOBAL
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        let gridData         = [];
+        let currentWords     = [];
+        let placedWords      = [];
+        let wordPlacements   = [];
+        let directionStats   = {};
+        let panelZIndex      = 100;
+        let isAnyPanelDragging  = false;
+        let isAnyPanelResizing  = false;
+        let isGenerating        = false;
+
+        let _projectId        = null;
+        let _projectCreatedAt = null;
+        let _currentDifficulty = null;
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           NAVEGACIÓN
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function goToMenu() {
+            window.location.href = 'index.html';
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           CARGA DESDE INDEX.HTML
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function loadFromLaunch() {
+            const raw = localStorage.getItem('lexa_launch');
+            if (!raw) return;
+            let launch;
+            try { launch = JSON.parse(raw); } catch { return; }
+            localStorage.removeItem('lexa_launch');
+
+            if (launch.type === 'template') {
+                const cfg = launch.config || {};
+                if (cfg.rows) document.getElementById('gridRows').value = cfg.rows;
+                if (cfg.cols) document.getElementById('gridCols').value = cfg.cols;
+                if (cfg.title) { document.getElementById('mainTitle').value = cfg.title; updateTitle(); }
+                _currentDifficulty = cfg.difficulty || null;
+
+            } else if (launch.type === 'project') {
+                const p = launch.data || {};
+                _projectId        = p._id        || null;
+                _projectCreatedAt = p.createdAt   || Date.now();
+                _currentDifficulty = p.difficulty || null;
+
+                document.getElementById('mainTitle').value = p.title    || 'SOPA DE LETRAS';
+                document.getElementById('subtitle').value  = p.subtitle || '';
+
+                gridData     = p.grid        || [];
+                currentWords = p.words       || [];
+                placedWords  = p.placedWords || [];
+
+                if (p.rows) document.getElementById('gridRows').value = p.rows;
+                if (p.cols) document.getElementById('gridCols').value = p.cols;
+
+                const cfg = p.config || {};
+                if (cfg.pageSize)       document.getElementById('pageSize').value       = cfg.pageSize;
+                if (cfg.gridStyle)      document.getElementById('gridStyle').value      = cfg.gridStyle;
+                if (cfg.titleFont)      document.getElementById('titleFont').value      = cfg.titleFont;
+                if (cfg.borderStyle)    document.getElementById('borderStyle').value    = cfg.borderStyle;
+                if (cfg.wordColumns)    document.getElementById('wordColumns').value    = cfg.wordColumns;
+                if (cfg.margin)         document.getElementById('margin').value         = cfg.margin;
+                if (cfg.gradientColor1) document.getElementById('gradientColor1').value = cfg.gradientColor1;
+                if (cfg.gradientColor2) document.getElementById('gradientColor2').value = cfg.gradientColor2;
+
+                updateTitle(); updateSubtitle();
+                changePageSize(); changeGridStyle(); changeTitleFont(); changeBorderStyle();
+                updateWordColumns(); updateMargins();
+
+                gridData.length > 0 ? renderGrid() : generateGrid();
+                document.getElementById('wordsList').value = currentWords.join('\n');
+                updateWordTags(); renderWordsList();
+                adaptLayoutToMargins(); updateStatus();
+            }
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           GUARDAR/CARGAR LOCAL (ranura única)
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function saveProject() {
+            const data = {
+                title: document.getElementById('mainTitle').value,
+                subtitle: document.getElementById('subtitle').value,
+                grid: gridData, words: currentWords, placedWords,
+                config: {
+                    pageSize:       document.getElementById('pageSize').value,
+                    gridStyle:      document.getElementById('gridStyle').value,
+                    titleFont:      document.getElementById('titleFont').value,
+                    borderStyle:    document.getElementById('borderStyle').value,
+                    wordColumns:    document.getElementById('wordColumns').value,
+                    gradientColor1: document.getElementById('gradientColor1').value,
+                    gradientColor2: document.getElementById('gradientColor2').value,
+                    margin:         document.getElementById('margin').value,
+                }
+            };
+            localStorage.setItem('sopaDeLetrasProject', JSON.stringify(data));
+            showEditorToast('Proyecto guardado en el navegador');
+        }
+
+        function loadProject() {
+            const saved = localStorage.getItem('sopaDeLetrasProject');
+            if (!saved) { showEditorToast('No hay proyecto guardado'); return; }
+            try {
+                const data = JSON.parse(saved);
+                document.getElementById('mainTitle').value = data.title    || '';
+                document.getElementById('subtitle').value  = data.subtitle || '';
+                gridData = data.grid || []; currentWords = data.words || []; placedWords = data.placedWords || [];
+                if (data.config) Object.keys(data.config).forEach(k => { const el = document.getElementById(k); if (el) el.value = data.config[k]; });
+                updateTitle(); updateSubtitle();
+                gridData.length > 0 ? renderGrid() : generateGrid();
+                document.getElementById('wordsList').value = currentWords.join('\n');
+                updateWordTags(); renderWordsList();
+                changePageSize(); changeGridStyle(); changeTitleFont(); changeBorderStyle(); updateWordColumns(); updateMargins();
+                adaptLayoutToMargins();
+                showEditorToast('Proyecto cargado');
+            } catch { showEditorToast('Error al cargar el proyecto'); }
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           GUARDAR EN INDEX.HTML
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function getIndexProjects() {
+            try { return JSON.parse(localStorage.getItem('lexa_projects') || '[]'); } catch { return []; }
+        }
+
+        function saveToIndex() {
+            const now  = Date.now();
+            const rows = gridData.length;
+            const cols = gridData[0]?.length || 0;
+            const title = document.getElementById('mainTitle').value.trim() || 'Sin título';
+
+            if (!_currentDifficulty) {
+                _currentDifficulty = rows <= 10 ? 'easy' : rows <= 15 ? 'medium' : 'hard';
+            }
+
+            if (!_projectId) {
+                _projectId        = 'proj_' + now + '_' + Math.random().toString(36).slice(2, 7);
+                _projectCreatedAt = now;
+            }
+
+            const project = {
+                _id: _projectId, title,
+                subtitle: document.getElementById('subtitle').value,
+                size: `${rows}×${cols}`, rows, cols,
+                difficulty: _currentDifficulty,
+                words: currentWords, placedWords, grid: gridData,
+                createdAt: _projectCreatedAt, lastModified: now,
+                config: {
+                    pageSize:       document.getElementById('pageSize').value,
+                    gridStyle:      document.getElementById('gridStyle').value,
+                    titleFont:      document.getElementById('titleFont').value,
+                    borderStyle:    document.getElementById('borderStyle').value,
+                    wordColumns:    document.getElementById('wordColumns').value,
+                    margin:         document.getElementById('margin').value,
+                    gradientColor1: document.getElementById('gradientColor1').value,
+                    gradientColor2: document.getElementById('gradientColor2').value,
+                }
+            };
+
+            const projects = getIndexProjects();
+            const existingIdx = projects.findIndex(p => p._id === _projectId);
+            if (existingIdx >= 0) projects[existingIdx] = project;
+            else projects.unshift(project);
+
+            localStorage.setItem('lexa_projects', JSON.stringify(projects.slice(0, 100)));
+            showEditorToast('Sopa guardada en Mis Sopas');
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           TOAST
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        let _toastTimer;
+        function showEditorToast(msg) {
+            const t = document.getElementById('editorToast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(_toastTimer);
+            _toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           INIT
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromLaunch();
+            if (gridData.length === 0) generateGrid();
+            updateStatus();
+            initDraggablePanels();
+            initCanvasPanning();
+            adaptLayoutToMargins();
+        });
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           SISTEMA DE PANELES
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function togglePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            panel.classList.contains('active') ? closePanel(panelId) : openPanel(panelId);
+        }
+
+        function openPanel(panelId) {
+            const panel = document.getElementById(panelId);
+            panel.classList.add('active');
+            panel.classList.remove('minimized');
+            bringToFront(panel);
+        }
+
+        function closePanel(panelId) {
+            document.getElementById(panelId).classList.remove('active');
+        }
+
+        function minimizePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            if (panel.classList.contains('minimized')) {
+                panel.classList.remove('minimized');
+                if (panel.dataset.prevHeight) {
+                    panel.style.height    = panel.dataset.prevHeight;
+                    panel.style.maxHeight = panel.dataset.prevHeight;
+                    delete panel.dataset.prevHeight;
+                }
+            } else {
+                panel.dataset.prevHeight = panel.style.height || panel.offsetHeight + 'px';
+                panel.classList.add('minimized');
+                panel.style.height = '44px';
+                panel.style.maxHeight = '44px';
+            }
+        }
+
+        function bringToFront(panel) {
+            panelZIndex++;
+            panel.style.zIndex = panelZIndex;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           DRAG DE PANELES
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function initDraggablePanels() {
+            const panels = document.querySelectorAll('.floating-panel');
+            panels.forEach(panel => {
+                const header = panel.querySelector('.panel-header');
+                let isDragging = false;
+                let dragStartX, dragStartY, panelStartX, panelStartY;
+
+                header.addEventListener('mousedown', dragStart);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', dragEnd);
+
+                function dragStart(e) {
+                    if (e.target.closest('.panel-btn')) return;
+                    if (e.target.closest('.resize-handle')) return;
+                    if (isAnyPanelResizing) return;
+                    e.preventDefault();
+                    bringToFront(panel);
+                    isDragging = true; isAnyPanelDragging = true;
+                    dragStartX = e.clientX; dragStartY = e.clientY;
+                    const rect = panel.getBoundingClientRect();
+                    panelStartX = rect.left; panelStartY = rect.top;
+                    header.style.cursor = 'grabbing';
+                    document.body.style.userSelect = 'none';
+                }
+
+                function drag(e) {
+                    if (!isDragging || isAnyPanelResizing) return;
+                    e.preventDefault();
+                    let newX = panelStartX + (e.clientX - dragStartX);
+                    let newY = panelStartY + (e.clientY - dragStartY);
+                    newY = Math.max(54, Math.min(window.innerHeight - 76, newY));
+                    newX = Math.max(-(panel.offsetWidth - 50), Math.min(window.innerWidth - 50, newX));
+                    panel.style.left = newX + 'px';
+                    panel.style.top  = newY + 'px';
+                }
+
+                function dragEnd() {
+                    if (isDragging) {
+                        isDragging = false; isAnyPanelDragging = false;
+                        header.style.cursor = 'move';
+                        document.body.style.userSelect = '';
+                    }
+                }
+
+                panel.addEventListener('mousedown', (e) => {
+                    if (!e.target.closest('.resize-handle')) bringToFront(panel);
+                });
+            });
+
+            initPanelResize(panels);
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           RESIZE DE PANELES
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function initPanelResize(panels) {
+            panels.forEach(panel => {
+                const handles = {
+                    top:    panel.querySelector('.resize-handle-top'),
+                    right:  panel.querySelector('.resize-handle-right'),
+                    bottom: panel.querySelector('.resize-handle-bottom'),
+                    left:   panel.querySelector('.resize-handle-left'),
+                    nw: panel.querySelector('.resize-handle-corner-nw'),
+                    ne: panel.querySelector('.resize-handle-corner-ne'),
+                    sw: panel.querySelector('.resize-handle-corner-sw'),
+                    se: panel.querySelector('.resize-handle-corner-se')
+                };
+
+                const MIN_W = 320, MAX_W = 800, MIN_H = 200, MAX_H = window.innerHeight - 120;
+                let isResizing = false, resizeDir = null;
+                let startX, startY, startW, startH, startL, startT;
+
+                Object.keys(handles).forEach(dir => {
+                    const h = handles[dir];
+                    if (h) h.addEventListener('mousedown', (e) => {
+                        if (isAnyPanelDragging) return;
+                        e.preventDefault(); e.stopPropagation();
+                        isResizing = true; isAnyPanelResizing = true; resizeDir = dir;
+                        startX = e.clientX; startY = e.clientY;
+                        const r = panel.getBoundingClientRect();
+                        startW = r.width; startH = r.height;
+                        startL = r.left;  startT = r.top;
+                        const cursors = { top:'ns-resize', bottom:'ns-resize', left:'ew-resize', right:'ew-resize', nw:'nwse-resize', se:'nwse-resize', ne:'nesw-resize', sw:'nesw-resize' };
+                        document.body.style.cursor = cursors[dir];
+                        document.body.style.userSelect = 'none';
+                        bringToFront(panel);
+                    });
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isResizing || isAnyPanelDragging) return;
+                    e.preventDefault();
+                    const dx = e.clientX - startX, dy = e.clientY - startY;
+                    let nW = startW, nH = startH, nL = startL, nT = startT;
+
+                    if (resizeDir === 'right'  || resizeDir === 'ne' || resizeDir === 'se') nW = startW + dx;
+                    if (resizeDir === 'left'   || resizeDir === 'nw' || resizeDir === 'sw') { nW = startW - dx; nL = startL + dx; }
+                    if (resizeDir === 'bottom' || resizeDir === 'sw' || resizeDir === 'se') nH = startH + dy;
+                    if (resizeDir === 'top'    || resizeDir === 'nw' || resizeDir === 'ne') { nH = startH - dy; nT = startT + dy; }
+
+                    nW = Math.max(MIN_W, Math.min(MAX_W, nW));
+                    nH = Math.max(MIN_H, Math.min(MAX_H, nH));
+
+                    if (resizeDir !== 'top' && resizeDir !== 'bottom') { panel.style.width = nW + 'px'; panel.style.left = nL + 'px'; }
+                    if (resizeDir !== 'left' && resizeDir !== 'right') { panel.style.height = nH + 'px'; panel.style.maxHeight = nH + 'px'; panel.style.top = nT + 'px'; }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    if (isResizing) {
+                        isResizing = false; isAnyPanelResizing = false; resizeDir = null;
+                        document.body.style.cursor = '';
+                        document.body.style.userSelect = '';
+                    }
+                });
+            });
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           PAN DEL CANVAS
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function initCanvasPanning() {
+            const workspace = document.getElementById('canvasWorkspace');
+            const content   = document.querySelector('.canvas-content');
+            let isPanning = false, startX, startY;
+            let translateX = 0, translateY = 0, scale = 1;
+
+            workspace.addEventListener('contextmenu', e => e.preventDefault());
+            workspace.addEventListener('mousedown', e => {
+                if (e.button === 2) {
+                    e.preventDefault(); isPanning = true;
+                    startX = e.clientX - translateX; startY = e.clientY - translateY;
+                    workspace.classList.add('panning');
+                }
+            });
+            workspace.addEventListener('mousemove', e => {
+                if (!isPanning) return;
+                e.preventDefault();
+                translateX = Math.max(-1000, Math.min(1000, e.clientX - startX));
+                translateY = Math.max(-1000, Math.min(1000, e.clientY - startY));
+                updateTransform();
+            });
+            workspace.addEventListener('mouseup', e => { if (e.button === 2) { isPanning = false; workspace.classList.remove('panning'); } });
+            workspace.addEventListener('mouseleave', () => { if (isPanning) { isPanning = false; workspace.classList.remove('panning'); } });
+            workspace.addEventListener('wheel', e => {
+                e.preventDefault();
+                scale = Math.max(0.5, Math.min(3, scale * (e.deltaY > 0 ? 0.95 : 1.05)));
+                updateTransform();
+            }, { passive: false });
+            workspace.addEventListener('dblclick', () => {
+                translateX = 0; translateY = 0; scale = 1; updateTransform();
+            });
+
+            function updateTransform() {
+                content.style.transform = `translate(${translateX}px,${translateY}px) scale(${scale})`;
+            }
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           GRILLA
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function generateGrid() {
+            let rows = parseInt(document.getElementById('gridRows').value);
+            let cols = parseInt(document.getElementById('gridCols').value);
+            if (isNaN(rows) || rows < 5) rows = 15;
+            if (isNaN(cols) || cols < 5) cols = 15;
+            rows = Math.min(30, Math.max(5, rows));
+            cols = Math.min(30, Math.max(5, cols));
+            document.getElementById('gridRows').value = rows;
+            document.getElementById('gridCols').value = cols;
+            gridData = Array(rows).fill().map(() => Array(cols).fill(''));
+            renderGrid(); adaptLayoutToMargins(); updateStatus();
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('puzzleGrid');
+            grid.innerHTML = '';
+            const rows = gridData.length, cols = gridData[0].length;
+            grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            gridData.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    const div = document.createElement('div');
+                    div.className = 'grid-cell';
+                    div.textContent = cell || '';
+                    div.dataset.row = i; div.dataset.col = j;
+                    div.id = `cell-${i}-${j}`;
+                    grid.appendChild(div);
+                });
+            });
+        }
+
+        function adaptLayoutToMargins() {
+            const paperContent = document.querySelector('.paper-content');
+            const paperHeader  = document.querySelector('.paper-header');
+            const wordsTitle   = document.querySelector('.words-title');
+
+            const margin = parseInt(document.getElementById('margin').value) || 40;
+            paperContent.style.padding = `${margin}px`;
+
+            const totalHeight  = paperContent.offsetHeight;
+            const headerHeight = paperHeader.offsetHeight;
+            const titleHeight  = wordsTitle.offsetHeight;
+            const availableH   = totalHeight - headerHeight - titleHeight - 40;
+            const gridAvailH   = availableH * 0.6;
+            const wordsAvailH  = availableH * 0.4;
+
+            const rows = gridData.length, cols = gridData[0]?.length || 15;
+            const gridPadding = 20, gridGap = 2 * Math.max(rows - 1, cols - 1);
+            const availableW  = paperContent.offsetWidth - gridPadding;
+            const maxByWidth  = (availableW - gridGap) / cols;
+            const maxByHeight = (gridAvailH - gridPadding - gridGap) / rows;
+            const cellSize    = Math.floor(Math.min(maxByWidth, maxByHeight, 35));
+            const fontSize    = Math.min(1.2, cellSize / 25);
+
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.style.width    = cellSize + 'px';
+                cell.style.height   = cellSize + 'px';
+                cell.style.fontSize = fontSize + 'rem';
+            });
+
+            adjustWordListFont(wordsAvailH);
+        }
+
+        function adjustWordListFont(maxHeight) {
+            const wordsList = document.getElementById('wordsListDisplay');
+            if (placedWords.length === 0) return;
+            const cols = parseInt(document.getElementById('wordColumns').value);
+            const wordsPerCol = Math.ceil(placedWords.length / cols);
+            const totalGaps = (wordsPerCol - 1) * 6;
+            const availablePerWord = (maxHeight - totalGaps) / wordsPerCol;
+            let fontSize = availablePerWord < 25 ? 0.6 : availablePerWord < 30 ? 0.7 : availablePerWord < 35 ? 0.75 : 0.85;
+            fontSize = Math.max(0.5, Math.min(0.85, fontSize));
+            wordsList.style.fontSize = fontSize + 'rem';
+            wordsList.querySelectorAll('.word-item').forEach(item => {
+                const p = Math.max(4, Math.floor(fontSize * 7));
+                item.style.padding = `${p}px ${p + 2}px`;
+            });
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           GESTIÓN DE PALABRAS
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function updateWordTags() {
+            const words = document.getElementById('wordsList').value
+                .split('\n')
+                .map(w => w.trim().toUpperCase())
+                .filter(w => w.length >= 3 && w.length <= 30);
+            const cols = parseInt(document.getElementById('wordColumns').value);
+            const maxWords = cols * 10;
+            if (words.length > maxWords) alert(`Máximo ${maxWords} palabras para ${cols} columnas.\nSolo se usarán las primeras ${maxWords}.`);
+            currentWords = [...new Set(words)].slice(0, maxWords);
+            document.getElementById('wordCount').textContent = currentWords.length;
+            const container = document.getElementById('wordTags');
+            container.innerHTML = '';
+            if (!currentWords.length) { container.innerHTML = '<div style="color:var(--text-tertiary);font-size:12px;">Las palabras aparecerán aquí…</div>'; return; }
+            currentWords.forEach((word, i) => {
+                const tag = document.createElement('div');
+                tag.className = 'word-tag';
+                tag.innerHTML = `<span>${word}</span><span class="word-tag-remove" onclick="removeWord(${i})">×</span>`;
+                container.appendChild(tag);
+            });
+            updateStatus();
+        }
+
+        function removeWord(index) {
+            const words = document.getElementById('wordsList').value.split('\n').filter(w => w.trim());
+            words.splice(index, 1);
+            document.getElementById('wordsList').value = words.join('\n');
+            updateWordTags();
+        }
+
+        function clearAllWords() {
+            if (confirm('¿Borrar todas las palabras?')) {
+                document.getElementById('wordsList').value = '';
+                updateWordTags();
+            }
+        }
+
+        function sortWords() {
+            document.getElementById('wordsList').value = [...currentWords].sort().join('\n');
+            updateWordTags();
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           GENERADOR DE SOPA
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        async function generatePuzzleWithWords() {
+            if (isGenerating) { alert('Ya hay una generación en proceso. Por favor espera.'); return; }
+            if (!currentWords.length) { alert('Por favor, escribe al menos una palabra antes de generar la sopa.'); return; }
+            isGenerating = true;
+            try {
+                showProgress(true); clearResultLog();
+                gridData = gridData.map(row => row.map(() => ''));
+                placedWords = []; wordPlacements = []; directionStats = {};
+
+                const directions = {
+                    horizontal: document.getElementById('dirHorizontal').checked,
+                    vertical:   document.getElementById('dirVertical').checked,
+                    diagonal:   document.getElementById('dirDiagonal').checked,
+                    reverse:    document.getElementById('dirReverse').checked
+                };
+
+                if (!directions.horizontal && !directions.vertical && !directions.diagonal) {
+                    alert('Debes seleccionar al menos una dirección.'); showProgress(false); return;
+                }
+
+                const wordMap = {};
+                const wordsForGrid = currentWords.map(w => {
+                    const clean = w.replace(/\s+/g,'').replace(/[^A-ZÑÁÉÍÓÚÜ]/g,'');
+                    if (clean.length >= 3) { wordMap[clean] = w; return clean; }
+                    return null;
+                }).filter(Boolean);
+
+                logResult('Iniciando generación…', 'info');
+                logResult(`Total de palabras: ${wordsForGrid.length}`, 'info');
+
+                const sorted = [...wordsForGrid].sort((a,b) => b.length - a.length);
+                let successCount = 0, failedWords = [];
+
+                for (let i = 0; i < sorted.length; i++) {
+                    const word = sorted[i];
+                    updateProgress(i + 1, sorted.length);
+                    await sleep(100);
+                    if (await placeWordInGrid(word, directions)) {
+                        successCount++;
+                        placedWords.push(word);
+                        logResult(`"${wordMap[word]}" colocada`, 'success');
+                    } else {
+                        failedWords.push(word);
+                        logResult(`"${wordMap[word]}" no se pudo colocar`, 'error');
+                    }
+                }
+
+                fillGridRandom();
+                updateWordTagsStatus();
+                logResult('', 'info');
+                logResult(`RESUMEN: ${successCount}/${wordsForGrid.length} colocadas`, 'success');
+
+                if (failedWords.length > 0) {
+                    setTimeout(() => {
+                        const failedOrig = failedWords.map(w => wordMap[w]);
+                        if (confirm(`${failedWords.length} palabra(s) no colocadas:\n${failedOrig.join('\n')}\n\n¿Eliminarlas de la lista?`)) {
+                            const newWords = currentWords.filter(w => !failedWords.includes(w.replace(/\s+/g,'').replace(/[^A-ZÑÁÉÍÓÚÜ]/g,'')));
+                            document.getElementById('wordsList').value = newWords.join('\n');
+                            updateWordTags();
+                        }
+                    }, 500);
+                }
+
+                renderWordsList(); adaptLayoutToMargins(); showProgress(false); updateStatus();
+
+            } catch (err) {
+                console.error(err);
+                alert('Error al generar: ' + err.message);
+            } finally {
+                isGenerating = false;
+            }
+        }
+
+        async function placeWordInGrid(word, directions) {
+            const rows = gridData.length, cols = gridData[0].length;
+            const dirs = [];
+            if (directions.horizontal) { dirs.push({name:'H',dr:0,dc:1}); if (directions.reverse) dirs.push({name:'H-REV',dr:0,dc:-1}); }
+            if (directions.vertical)   { dirs.push({name:'V',dr:1,dc:0}); if (directions.reverse) dirs.push({name:'V-REV',dr:-1,dc:0}); }
+            if (directions.diagonal)   { dirs.push({name:'D',dr:1,dc:1}); if (directions.reverse) { dirs.push({name:'D-REV1',dr:-1,dc:-1}); dirs.push({name:'D-REV2',dr:1,dc:-1}); dirs.push({name:'D-REV3',dr:-1,dc:1}); } }
+            if (!dirs.length) return false;
+            dirs.forEach(d => { if (!directionStats[d.name]) directionStats[d.name] = 0; });
+
+            const sorted = [...dirs].sort((a,b) => directionStats[a.name] - directionStats[b.name]);
+            for (let attempt = 0; attempt < 300; attempt++) {
+                const d = attempt < 240 ? sorted[Math.floor(Math.random() * Math.min(4, sorted.length))] : dirs[Math.floor(Math.random() * dirs.length)];
+                const r = Math.floor(Math.random() * rows), c = Math.floor(Math.random() * cols);
+                if (canPlaceWord(word, r, c, d)) { placeWord(word, r, c, d); directionStats[d.name]++; wordPlacements.push({word,row:r,col:c,direction:d.name}); return true; }
+            }
+            return false;
+        }
+
+        function canPlaceWord(word, sr, sc, dir) {
+            const rows = gridData.length, cols = gridData[0].length;
+            for (let i = 0; i < word.length; i++) {
+                const r = sr + i * dir.dr, c = sc + i * dir.dc;
+                if (r < 0 || r >= rows || c < 0 || c >= cols) return false;
+                if (gridData[r][c] !== '' && gridData[r][c] !== word[i]) return false;
+            }
+            return true;
+        }
+
+        function placeWord(word, sr, sc, dir) {
+            const cells = [];
+            for (let i = 0; i < word.length; i++) {
+                const r = sr + i * dir.dr, c = sc + i * dir.dc;
+                gridData[r][c] = word[i];
+                cells.push({r, c});
+            }
+            renderGrid(); adaptLayoutToMargins();
+            cells.forEach(({r, c}, idx) => {
+                setTimeout(() => {
+                    const el = document.getElementById(`cell-${r}-${c}`);
+                    if (el) { el.classList.add('word-placed'); setTimeout(() => el.classList.remove('word-placed'), 300); }
+                }, idx * 50);
+            });
+        }
+
+        function fillGridRandom() {
+            const letters = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ';
+            gridData.forEach((row, i) => row.forEach((cell, j) => {
+                if (!cell) gridData[i][j] = letters[Math.floor(Math.random() * letters.length)];
+            }));
+            renderGrid(); adaptLayoutToMargins();
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           UI HELPERS
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function showProgress(show) { document.getElementById('resultLogContainer').style.display = show ? 'block' : 'none'; }
+        function updateProgress(cur, tot) {
+            document.getElementById('progressFill').style.width  = (cur/tot*100) + '%';
+            document.getElementById('progressText').textContent  = `${cur}/${tot}`;
+        }
+        function logResult(msg, type) {
+            const log = document.getElementById('resultLog');
+            const div = document.createElement('div');
+            div.className = `log-entry ${type}`;
+            div.textContent = msg;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+        function clearResultLog() { document.getElementById('resultLog').innerHTML = ''; }
+
+        function updateWordTagsStatus() {
+            document.querySelectorAll('.word-tag').forEach((tag, i) => {
+                const word = currentWords[i];
+                const clean = word.replace(/\s+/g,'').replace(/[^A-ZÑÁÉÍÓÚÜ]/g,'');
+                tag.classList.toggle('placed', placedWords.includes(clean));
+                tag.classList.toggle('failed', !placedWords.includes(clean));
+            });
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        function renderWordsList() {
+            const list = document.getElementById('wordsListDisplay');
+            const showCb = document.getElementById('showCheckboxes').checked;
+            list.innerHTML = '';
+            currentWords.forEach((word, i) => {
+                const clean = word.replace(/\s+/g,'').replace(/[^A-ZÑÁÉÍÓÚÜ]/g,'');
+                if (!placedWords.includes(clean)) return;
+                const li = document.createElement('li');
+                li.className = 'word-item';
+                if (showCb) {
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox'; cb.className = 'word-checkbox'; cb.id = `word-${i}`;
+                    cb.addEventListener('change', function() { li.classList.toggle('found', this.checked); });
+                    li.appendChild(cb);
+                }
+                const label = document.createElement('label');
+                label.textContent = word;
+                if (showCb) { label.htmlFor = `word-${i}`; label.style.cursor = 'pointer'; }
+                li.appendChild(label);
+                list.appendChild(li);
+            });
+        }
+
+        function toggleCheckboxes() { renderWordsList(); setTimeout(() => adaptLayoutToMargins(), 100); }
+
+        function updateWordColumns() {
+            const cols = document.getElementById('wordColumns').value;
+            document.getElementById('wordsListDisplay').className = 'words-list cols-' + cols;
+            updateWordTags();
+            setTimeout(() => adaptLayoutToMargins(), 100);
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           ESTILOS
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function changePageSize() {
+            const size = document.getElementById('pageSize').value;
+            document.getElementById('paper').className = 'paper ' + size;
+            updateStatus();
+            setTimeout(() => adaptLayoutToMargins(), 100);
+        }
+
+        function updateMargins() {
+            document.getElementById('marginValue').textContent = document.getElementById('margin').value + 'px';
+            setTimeout(() => adaptLayoutToMargins(), 100);
+        }
+
+        function updateZoom() {
+            const zoom = document.getElementById('zoomLevel').value;
+            document.getElementById('paper').style.transform = `scale(${zoom / 100})`;
+            document.getElementById('zoomValue').textContent = zoom + '%';
+        }
+
+        function changeGridStyle() {
+            document.getElementById('puzzleGrid').className = 'puzzle-grid style-' + document.getElementById('gridStyle').value;
+        }
+
+        function updateTitle() {
+            document.getElementById('paperTitle').textContent = (document.getElementById('mainTitle').value || '').toUpperCase();
+        }
+
+        function updateSubtitle() {
+            const el = document.getElementById('paperSubtitle');
+            el.textContent = document.getElementById('subtitle').value;
+            el.style.display = document.getElementById('subtitle').value ? 'block' : 'none';
+        }
+
+        function changeTitleFont() {
+            document.getElementById('paperTitle').className = 'paper-title font-' + document.getElementById('titleFont').value;
+        }
+
+        function changeBorderStyle() {
+            const style = document.getElementById('borderStyle').value;
+            const header = document.getElementById('paperHeader');
+            const gs = document.getElementById('gradientColorsSection');
+            header.className = 'paper-header';
+            if (style === 'gradient') { gs.style.display = 'block'; header.classList.add('border-gradient'); updateGradientColors(); }
+            else { gs.style.display = 'none'; if (style !== 'none') header.classList.add('border-' + style); }
+        }
+
+        function updateGradientColors() {
+            const c1 = document.getElementById('gradientColor1').value;
+            const c2 = document.getElementById('gradientColor2').value;
+            const old = document.getElementById('gradient-style');
+            if (old) old.remove();
+            const style = document.createElement('style');
+            style.id = 'gradient-style';
+            style.textContent = `.border-gradient::after { background: linear-gradient(90deg, ${c1}, ${c2}) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }`;
+            document.head.appendChild(style);
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           PDF
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        async function savePDF() {
+            const pageSize  = document.getElementById('pageSize').value;
+            const element   = document.getElementById('paper');
+            const title     = document.getElementById('mainTitle').value.trim();
+            const formatted = title ? title.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('') : 'SopaDeLetras';
+            const filename  = `Lexa-${formatted}.pdf`;
+
+            const origTransform   = element.style.transform;
+            const canvasContent   = document.querySelector('.canvas-content');
+            const canvasTransform = canvasContent.style.transform;
+            element.style.transform     = 'none';
+            canvasContent.style.transform = 'none';
+
+            const pageW = 612, pageH = pageSize === 'carta' ? 792 : 1008;
+            try {
+                const canvas  = await html2canvas(element, { scale:3, useCORS:true, logging:false, backgroundColor:'#ffffff', windowHeight:element.scrollHeight, height:element.scrollHeight, width:element.scrollWidth });
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation:'portrait', unit:'pt', format:[pageW, pageH], compress:true });
+                const imgW = pageW, imgH = (canvas.height * imgW) / canvas.width;
+                pdf.addImage(imgData, 'JPEG', 0, imgH > pageH ? 0 : (pageH - imgH)/2, imgW, imgH);
+                pdf.save(filename);
+            } catch (err) {
+                console.error(err);
+                alert('Error al generar el PDF. Intenta de nuevo.');
+            } finally {
+                element.style.transform       = origTransform;
+                canvasContent.style.transform = canvasTransform;
+            }
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           IMPORTAR / EXPORTAR
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        function openImportModal() { document.getElementById('importModal').classList.add('active'); }
+        function closeModal(id)    { document.getElementById(id).classList.remove('active'); }
+
+        async function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) await processImage(file);
+        }
+
+        async function processImage(file) {
+            const statusDiv = document.getElementById('ocrStatus');
+            statusDiv.innerHTML = '<div class="spinner"></div><p style="text-align:center;margin-top:14px;color:var(--text-secondary);">Procesando imagen con OCR…</p>';
+            let worker;
+            try {
+                worker = await Tesseract.createWorker('spa');
+                const { data: { text } } = await worker.recognize(file);
+                processOCRText(text);
+                statusDiv.innerHTML = '<div style="padding:12px 14px;background:var(--green-soft);color:var(--green);border:1px solid var(--green-border);border-radius:8px;text-align:center;font-weight:600;font-size:13px;">Imagen procesada correctamente</div>';
+                setTimeout(() => closeModal('importModal'), 2000);
+            } catch (err) {
+                statusDiv.innerHTML = `<div style="padding:12px 14px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-border);border-radius:8px;font-size:13px;">Error: ${err.message}</div>`;
+            } finally {
+                if (worker) await worker.terminate();
+            }
+        }
+
+        function processOCRText(text) {
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            let title = '', gridLines = [], words = [], inGrid = false;
+            lines.forEach(line => {
+                const onlyLetters = line.replace(/[^A-ZÑ]/gi,'');
+                const hasSpaces = line.includes(' ');
+                if (!title && line.length > 5) title = line;
+                if (onlyLetters.length > 10 && hasSpaces) {
+                    inGrid = true;
+                    gridLines.push(line.replace(/[^A-ZÑ\s]/gi,'').trim().toUpperCase().split(/\s+/));
+                } else if (inGrid && onlyLetters.length < 8) { inGrid = false; }
+                if (!inGrid && onlyLetters.length >= 3 && onlyLetters.length < 25) {
+                    line.split(/\s{2,}|\t/).filter(w => w.trim().length > 0).forEach(word => {
+                        const clean = word.replace(/[^A-ZÑ\s]/gi,'').trim().toUpperCase();
+                        if (clean.length >= 3) words.push(clean);
+                    });
+                }
+            });
+            if (title) { document.getElementById('mainTitle').value = title; updateTitle(); }
+            if (gridLines.length > 0) {
+                const maxC = Math.max(...gridLines.map(r => r.length));
+                const rows = Math.min(30, gridLines.length), cols = Math.min(30, maxC);
+                document.getElementById('gridRows').value = rows;
+                document.getElementById('gridCols').value = cols;
+                gridData = gridLines.slice(0, rows).map(row => {
+                    while (row.length < cols) row.push('');
+                    return row.slice(0, cols);
+                });
+                renderGrid(); adaptLayoutToMargins();
+            }
+            if (words.length > 0) {
+                document.getElementById('wordsList').value = [...new Set(words)].sort().join('\n');
+                updateWordTags();
+            }
+        }
+
+        function exportAsJSON() {
+            const title = document.getElementById('mainTitle').value.trim();
+            const formatted = title ? title.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join('') : 'SopaDeLetras';
+            const data = {
+                _id: _projectId, title, subtitle: document.getElementById('subtitle').value,
+                grid: gridData, words: currentWords, placedWords,
+                rows: gridData.length, cols: gridData[0]?.length || 0,
+                difficulty: _currentDifficulty,
+                config: {
+                    pageSize: document.getElementById('pageSize').value,
+                    gridStyle: document.getElementById('gridStyle').value,
+                    titleFont: document.getElementById('titleFont').value,
+                    borderStyle: document.getElementById('borderStyle').value,
+                    wordColumns: document.getElementById('wordColumns').value,
+                    gradientColor1: document.getElementById('gradientColor1').value,
+                    gradientColor2: document.getElementById('gradientColor2').value,
+                    margin: document.getElementById('margin').value
+                }
+            };
+            downloadFile(`Lexa-${formatted}.json`, JSON.stringify(data, null, 2));
+        }
+
+        function importFromJSON() {
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = '.json';
+            input.onchange = (e) => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const p = JSON.parse(ev.target.result);
+                        _projectId = p._id || null; _projectCreatedAt = p.createdAt || null; _currentDifficulty = p.difficulty || null;
+                        document.getElementById('mainTitle').value = p.title    || '';
+                        document.getElementById('subtitle').value  = p.subtitle || '';
+                        gridData = p.grid || []; currentWords = p.words || []; placedWords = p.placedWords || [];
+                        if (p.rows) document.getElementById('gridRows').value = p.rows;
+                        if (p.cols) document.getElementById('gridCols').value = p.cols;
+                        if (p.config) Object.keys(p.config).forEach(k => { const el = document.getElementById(k); if (el) el.value = p.config[k]; });
+                        updateTitle(); updateSubtitle();
+                        gridData.length > 0 ? renderGrid() : generateGrid();
+                        document.getElementById('wordsList').value = currentWords.join('\n');
+                        updateWordTags(); renderWordsList();
+                        changePageSize(); changeGridStyle(); changeTitleFont(); changeBorderStyle(); updateWordColumns(); updateMargins();
+                        adaptLayoutToMargins();
+                        showEditorToast('Proyecto importado correctamente');
+                    } catch (err) { alert('Error al importar: ' + err.message); }
+                };
+                reader.readAsText(e.target.files[0]);
+            };
+            input.click();
+        }
+
+        function downloadFile(filename, content) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([content], {type:'text/plain'}));
+            a.download = filename; a.click();
+        }
+
+        function resetAll() {
+            if (!confirm('¿Resetear todo?\n\nSe borrarán palabras, grilla y configuración. No se puede deshacer.')) return;
+            _projectId = null; _projectCreatedAt = null; _currentDifficulty = null;
+            document.getElementById('mainTitle').value = 'SOPA DE LETRAS';
+            document.getElementById('subtitle').value  = '';
+            document.getElementById('wordsList').value  = '';
+            currentWords = []; placedWords = [];
+            generateGrid(); updateTitle(); updateSubtitle(); updateWordTags(); renderWordsList(); clearResultLog();
+        }
+
+        function updateStatus() {
+            document.getElementById('statusSize').textContent   = `${gridData.length}×${gridData[0]?.length || 0}`;
+            document.getElementById('statusWords').textContent  = currentWords.length;
+            document.getElementById('statusPlaced').textContent = placedWords.length;
+        }
+    </script>
+</body>
+</html>

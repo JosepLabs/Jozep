@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lexa - Inicio</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.png">
+    
+    <style>
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           TOKENS
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        :root {
+            --sidebar-w: 228px;
+            --sidebar-bg: #0d1117;
+            --sidebar-border: rgba(255,255,255,0.06);
+            --sidebar-accent: rgba(255,255,255,0.05);
+
+            --bg: #f5f6f8;
+            --surface: #ffffff;
+            --surface-2: #f9fafb;
+            --border: #e8eaed;
+            --border-2: #f0f1f3;
+
+            --text-primary: #0f1117;
+            --text-secondary: #5c6370;
+            --text-tertiary: #9ba3af;
+
+            --blue: #2563eb;
+            --blue-soft: #eff6ff;
+            --blue-border: #bfdbfe;
+
+            --amber: #d97706;
+            --amber-soft: #fffbeb;
+            --amber-border: #fde68a;
+
+            --green: #16a34a;
+            --green-soft: #f0fdf4;
+            --green-border: #bbf7d0;
+
+            --violet: #7c3aed;
+            --violet-soft: #f5f3ff;
+            --violet-border: #ddd6fe;
+
+            --red: #dc2626;
+            --red-soft: #fef2f2;
+            --red-border: #fecaca;
+
+            --radius-sm: 6px;
+            --radius: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 18px;
+
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           RESET + BASE
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { height: 100%; }
+
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button { font-family: inherit; cursor: pointer; }
+        a      { text-decoration: none; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           SIDEBAR
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-width: var(--sidebar-w);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 20;
+        }
+
+        /* subtle noise texture */
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .sidebar-logo {
+            padding: 26px 22px 20px;
+            border-bottom: 1px solid var(--sidebar-border);
+            position: relative;
+        }
+
+        .logo-mark {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            background: linear-gradient(110deg, #60a5fa 0%, #f5b30c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.22);
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        /* ── Nav ── */
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .nav-section + .nav-section {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--sidebar-border);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            color: rgba(255,255,255,0.42);
+            font-size: 13px;
+            font-weight: 500;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            transition: color 0.13s, background 0.13s;
+            position: relative;
+            letter-spacing: 0.1px;
+        }
+
+        .nav-item:hover {
+            background: var(--sidebar-accent);
+            color: rgba(255,255,255,0.82);
+        }
+
+        .nav-item.active {
+            background: rgba(37,99,235,0.14);
+            color: #93c5fd;
+        }
+
+        .nav-item.active .nav-icon { color: #60a5fa; }
+
+        .nav-item.trash-item:hover { color: rgba(252,165,165,0.85); }
+        .nav-item.trash-item.active { background: rgba(220,38,38,0.12); color: #fca5a5; }
+        .nav-item.trash-item.active .nav-icon { color: #f87171; }
+
+        .nav-icon {
+            width: 15px; height: 15px;
+            flex-shrink: 0;
+            color: rgba(255,255,255,0.28);
+            transition: color 0.13s;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: rgba(220,38,38,0.2);
+            color: #fca5a5;
+            font-family: 'DM Mono', monospace;
+            font-size: 10px;
+            font-weight: 500;
+            padding: 1px 6px;
+            border-radius: 99px;
+        }
+
+        /* ── Sidebar bottom ── */
+        .sidebar-bottom {
+            padding: 10px 10px 18px;
+            border-top: 1px solid var(--sidebar-border);
+        }
+
+        .sidebar-avatar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            transition: background 0.13s;
+        }
+
+        .sidebar-avatar:hover { background: var(--sidebar-accent); }
+
+        .avatar-circle {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; color: white;
+            flex-shrink: 0;
+        }
+
+        .avatar-name {
+            font-size: 12.5px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.55);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           MAIN AREA
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .main {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .main::-webkit-scrollbar { width: 5px; }
+        .main::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        .main::-webkit-scrollbar-track { background: transparent; }
+
+        .main-inner {
+            padding: 44px 52px 60px;
+            max-width: 1100px;
+        }
+
+        /* ── Sections ── */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           PAGE HEADER
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .page-header {
+            margin-bottom: 36px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.6px;
+            line-height: 1.2;
+        }
+
+        .page-sub {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            font-weight: 400;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           STATS STRIP
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .stats-strip {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 44px;
+        }
+
+        .stat-pill {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            min-width: 130px;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .stat-pill:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-1px);
+        }
+
+        .stat-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.blue   { background: var(--blue-soft);   color: var(--blue); }
+        .stat-icon.green  { background: var(--green-soft);  color: var(--green); }
+        .stat-icon.amber  { background: var(--amber-soft);  color: var(--amber); }
+
+        .stat-pill-val   { font-size: 24px; font-weight: 700; color: var(--text-primary); line-height: 1; font-variant-numeric: tabular-nums; }
+        .stat-pill-label { font-size: 11.5px; color: var(--text-tertiary); margin-top: 3px; font-weight: 500; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           SECTION LABEL
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .section-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-tertiary);
+            margin-bottom: 14px;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           DIFFICULTY CARDS
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .difficulty-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 48px;
+        }
+
+        .diff-card {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+
+        .diff-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .diff-card:hover .diff-cta { opacity: 1; transform: translateY(0); }
+        .diff-card:active { transform: translateY(-2px) scale(1); }
+
+        /* per-difficulty theming */
+        .diff-card.easy   { border-color: var(--blue-border); }
+        .diff-card.medium { border-color: var(--amber-border); }
+        .diff-card.hard   { border-color: var(--green-border); }
+        .diff-card.custom { border-color: var(--violet-border); border-style: dashed; }
+
+        .diff-card.easy   .diff-header { background: linear-gradient(145deg, #eff6ff, #dbeafe 80%); }
+        .diff-card.medium .diff-header { background: linear-gradient(145deg, #fffbeb, #fef3c7 80%); }
+        .diff-card.hard   .diff-header { background: linear-gradient(145deg, #f0fdf4, #dcfce7 80%); }
+        .diff-card.custom .diff-header { background: linear-gradient(145deg, #f5f3ff, #ede9fe 80%); }
+
+        .diff-card.easy   .diff-badge { background: var(--blue-soft);   color: #1d4ed8; border: 1px solid var(--blue-border); }
+        .diff-card.medium .diff-badge { background: var(--amber-soft);  color: #92400e; border: 1px solid var(--amber-border); }
+        .diff-card.hard   .diff-badge { background: var(--green-soft);  color: #166534; border: 1px solid var(--green-border); }
+        .diff-card.custom .diff-badge { background: var(--violet-soft); color: #5b21b6; border: 1px solid var(--violet-border); }
+
+        .diff-card.easy   .diff-grid-cell.filled { background: #93c5fd; }
+        .diff-card.medium .diff-grid-cell.filled { background: #fcd34d; }
+        .diff-card.hard   .diff-grid-cell.filled { background: #86efac; }
+
+        .diff-header {
+            height: 128px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 16px;
+        }
+
+        .diff-badge {
+            position: absolute;
+            top: 10px; left: 10px;
+            font-size: 9.5px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            padding: 3px 8px; border-radius: 5px;
+        }
+
+        .diff-grid-preview { display: grid; gap: 3px; }
+
+        .diff-grid-cell {
+            width: 100%; aspect-ratio: 1;
+            border-radius: 2px;
+            background: rgba(0,0,0,0.08);
+            transition: background 0.15s;
+        }
+
+        .diff-body {
+            padding: 15px 17px 18px;
+            border-top: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .diff-title { font-size: 14.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .diff-desc  { font-size: 11.5px; color: var(--text-secondary); line-height: 1.55; }
+
+        .diff-size {
+            font-family: 'DM Mono', monospace;
+            font-size: 10.5px; font-weight: 500;
+            color: var(--text-tertiary); margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .diff-cta {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(6px);
+            border-top: 1px solid var(--border);
+            padding: 10px 16px;
+            font-size: 12px; font-weight: 600; color: var(--blue);
+            opacity: 0; transform: translateY(6px);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .diff-card.custom .diff-cta { color: var(--violet); }
+
+        .diff-cta svg { width: 11px; height: 11px; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           SOUPS LIST (shared by Recents + Mis Sopas)
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .soups-list {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .soup-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 13px 18px;
+            border-bottom: 1px solid var(--border-2);
+            cursor: pointer;
+            transition: background 0.1s;
+            position: relative;
+        }
+
+        .soup-item:last-child { border-bottom: none; }
+
+        .soup-item:hover { background: var(--surface-2); }
+        .soup-item:hover .soup-actions { opacity: 1; pointer-events: all; }
+
+        /* ── Thumb ── */
+        .soup-thumb {
+            width: 40px; height: 40px;
+            border-radius: 9px;
+            flex-shrink: 0;
+            overflow: hidden;
+            padding: 5px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+        }
+
+        .soup-thumb-inner {
+            width: 100%; height: 100%;
+            display: grid;
+            gap: 1.5px;
+        }
+
+        .soup-thumb-cell { border-radius: 1px; background: #e5e7eb; }
+        .soup-thumb-cell.blue   { background: #93c5fd; }
+        .soup-thumb-cell.amber  { background: #fcd34d; }
+        .soup-thumb-cell.green  { background: #86efac; }
+
+        /* ── Info ── */
+        .soup-info { flex: 1; min-width: 0; }
+
+        .soup-name {
+            font-size: 13.5px; font-weight: 600; color: var(--text-primary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .soup-meta {
+            font-size: 11.5px; color: var(--text-tertiary);
+            margin-top: 3px; display: flex; gap: 12px; align-items: center;
+        }
+
+        .diff-tag {
+            font-family: 'DM Mono', monospace;
+            font-size: 9.5px; font-weight: 600;
+            padding: 2px 7px; border-radius: 4px;
+            letter-spacing: 0.3px;
+        }
+        .diff-tag.easy   { background: var(--blue-soft);   color: #1d4ed8;  border: 1px solid var(--blue-border); }
+        .diff-tag.medium { background: var(--amber-soft);  color: #92400e;  border: 1px solid var(--amber-border); }
+        .diff-tag.hard   { background: var(--green-soft);  color: #166534;  border: 1px solid var(--green-border); }
+        .diff-tag.custom { background: var(--violet-soft); color: #5b21b6;  border: 1px solid var(--violet-border); }
+
+        /* ── Actions ── */
+        .soup-actions {
+            display: flex; align-items: center; gap: 5px;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.15s; flex-shrink: 0;
+        }
+
+        .action-btn {
+            width: 30px; height: 30px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 7px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.12s, border-color 0.12s, color 0.12s;
+            color: var(--text-secondary);
+        }
+
+        .action-btn svg { width: 13px; height: 13px; }
+
+        .action-btn:hover { background: var(--surface-2); border-color: #d1d5db; color: var(--text-primary); }
+        .action-btn.danger:hover { background: var(--red-soft); border-color: var(--red-border); color: var(--red); }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           TRASH
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .trash-notice {
+            display: flex; align-items: flex-start; gap: 10px;
+            background: var(--amber-soft);
+            border: 1px solid var(--amber-border);
+            border-radius: var(--radius);
+            padding: 12px 15px;
+            margin-bottom: 18px;
+            font-size: 12.5px; color: #78350f; line-height: 1.6;
+        }
+
+        .trash-notice svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; color: var(--amber); }
+
+        .trash-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 13px 18px;
+            border-bottom: 1px solid var(--border-2);
+        }
+
+        .trash-item:last-child { border-bottom: none; }
+
+        .trash-info { flex: 1; min-width: 0; }
+
+        .trash-name {
+            font-size: 13.5px; font-weight: 600; color: var(--text-secondary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .trash-meta {
+            font-size: 11.5px; color: var(--text-tertiary);
+            margin-top: 3px; display: flex; gap: 12px; align-items: center;
+        }
+
+        .expires-tag { font-size: 11px; font-weight: 600; color: var(--text-tertiary); }
+        .expires-tag.soon  { color: var(--amber); }
+        .expires-tag.urgent { color: var(--red); }
+
+        .trash-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+        .btn-restore {
+            height: 30px;
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 12px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: var(--surface);
+            font-size: 12px; font-weight: 500; color: var(--text-secondary);
+            transition: all 0.12s;
+        }
+
+        .btn-restore svg { width: 11px; height: 11px; }
+
+        .btn-restore:hover {
+            background: var(--green-soft);
+            border-color: var(--green-border);
+            color: var(--green);
+        }
+
+        .btn-del-perm {
+            height: 30px;
+            display: flex; align-items: center; gap: 6px;
+            padding: 0 12px;
+            border: none;
+            border-radius: 7px;
+            background: var(--red-soft);
+            color: var(--red);
+            border: 1px solid var(--red-border);
+            font-size: 12px; font-weight: 600;
+            transition: all 0.12s;
+        }
+
+        .btn-del-perm svg { width: 11px; height: 11px; }
+        .btn-del-perm:hover { background: var(--red); border-color: var(--red); color: white; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           EMPTY STATE
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .empty-state {
+            padding: 56px 24px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 44px; height: 44px;
+            margin: 0 auto 14px;
+            color: #d1d5db;
+        }
+
+        .empty-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+        .empty-desc  { font-size: 13px; line-height: 1.6; color: var(--text-tertiary); }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           SETTINGS
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            max-width: 480px;
+        }
+
+        .settings-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .settings-section {
+            padding: 22px 24px;
+            border-bottom: 1px solid var(--border-2);
+        }
+
+        .settings-section:last-child { border-bottom: none; }
+
+        .settings-section-title {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-tertiary);
+            margin-bottom: 18px;
+        }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group:last-child { margin-bottom: 0; }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-primary);
+            background: var(--surface);
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* Toggle */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .toggle-row-label { flex: 1; }
+        .toggle-row-label .form-label { margin-bottom: 2px; }
+
+        .toggle {
+            width: 38px; height: 22px;
+            background: #e5e7eb;
+            border-radius: 99px;
+            position: relative;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s;
+            border: none;
+        }
+
+        .toggle.on { background: var(--blue); }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 17px; height: 17px;
+            border-radius: 50%;
+            background: white;
+            top: 2.5px; left: 2.5px;
+            transition: transform 0.2s cubic-bezier(.34,1.56,.64,1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .toggle.on::after { transform: translateX(16px); }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 16px;
+            border: none; border-radius: var(--radius);
+            font-size: 13px; font-weight: 600;
+            font-family: inherit; cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn svg { width: 13px; height: 13px; }
+        .btn-danger-soft { background: var(--red-soft); color: var(--red); border: 1px solid var(--red-border); }
+        .btn-danger-soft:hover { background: var(--red); color: white; border-color: var(--red); }
+
+        /* Storage bar */
+        .storage-bar-wrap {
+            margin-top: 12px;
+        }
+
+        .storage-bar-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-bottom: 8px;
+        }
+
+        .storage-bar-track {
+            height: 5px;
+            background: var(--border);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .storage-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), #8b5cf6);
+            border-radius: 99px;
+            transition: width 0.5s ease;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           MODAL
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(15,17,23,0.5);
+            backdrop-filter: blur(3px);
+            z-index: 900;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .modal-overlay.show { opacity: 1; pointer-events: all; }
+
+        .modal {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            padding: 28px 28px 24px;
+            max-width: 380px; width: 90%;
+            box-shadow: var(--shadow-lg), 0 0 0 1px var(--border);
+            transform: scale(0.95) translateY(8px);
+            transition: transform 0.22s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        .modal-overlay.show .modal { transform: scale(1) translateY(0); }
+
+        .modal-icon {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .modal-icon.danger { background: var(--red-soft); color: var(--red); }
+
+        .modal-icon svg { width: 20px; height: 20px; }
+
+        .modal-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 7px; }
+        .modal-desc  { font-size: 13px; color: var(--text-secondary); line-height: 1.65; }
+
+        .modal-actions {
+            display: flex; gap: 8px;
+            margin-top: 22px; justify-content: flex-end;
+        }
+
+        .btn-ghost { background: var(--surface-2); color: var(--text-secondary); border: 1px solid var(--border); }
+        .btn-ghost:hover { background: var(--border); color: var(--text-primary); }
+
+        .btn-danger { background: var(--red); color: white; border: none; }
+        .btn-danger:hover { background: #b91c1c; }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           TOAST
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        .toast {
+            position: fixed;
+            bottom: 28px; left: 50%;
+            transform: translateX(-50%) translateY(16px);
+            background: var(--text-primary);
+            color: white;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-size: 13px; font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+            box-shadow: var(--shadow-lg);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .toast-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            flex-shrink: 0;
+        }
+
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           RESPONSIVE
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        @media (max-width: 1100px) {
+            .difficulty-row { grid-template-columns: repeat(2, 1fr); }
+            .main-inner { padding: 36px 36px 60px; }
+        }
+
+        @media (max-width: 768px) {
+            :root { --sidebar-w: 64px; }
+            .logo-mark, .logo-sub, .nav-item span, .avatar-name { display: none; }
+            .nav-item { justify-content: center; padding: 10px; }
+            .nav-icon { color: rgba(255,255,255,0.45); width: 18px; height: 18px; }
+            .sidebar-logo { padding: 18px 12px; display: flex; justify-content: center; }
+            .sidebar-bottom { padding: 10px 10px 14px; }
+            .sidebar-avatar { justify-content: center; }
+            .avatar-circle { width: 34px; height: 34px; font-size: 13px; }
+            .main-inner { padding: 28px 20px 40px; }
+            .stats-strip { flex-direction: column; }
+            .difficulty-row { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SIDEBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <span class="logo-mark">LEXA</span>
+        <span class="logo-sub">Editor de Sopas</span>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <button class="nav-item active" data-section="home">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 00.5.5h4a.5.5 0 00.5-.5v-7a.5.5 0 00-.146-.354L13 5.793V2.5a.5.5 0 00-.5-.5h-1a.5.5 0 00-.5.5v1.293L8.354 1.146a.5.5 0 00-.708 0l-6 6A.5.5 0 001.5 7.5v7a.5.5 0 00.5.5h4a.5.5 0 00.5-.5z"/></svg>
+                </span>
+                <span>Inicio</span>
+            </button>
+            <button class="nav-item" data-section="saved">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="1.5" width="12" height="13" rx="2"/>
+                        <path d="M5 5.5h6M5 8.5h6M5 11.5h4"/>
+                    </svg>
+                </span>
+                <span>Mis Sopas</span>
+            </button>
+        </div>
+
+        <div class="nav-section">
+            <button class="nav-item trash-item" data-section="trash">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="2,4 14,4"/>
+                        <path d="M12.5 4V13a1 1 0 01-1 1H4.5a1 1 0 01-1-1V4M5.5 4V3a1 1 0 011-1h3a1 1 0 011 1v1"/>
+                        <path d="M6.5 7v4M9.5 7v4"/>
+                    </svg>
+                </span>
+                <span>Papelera</span>
+                <span class="nav-badge" id="trashBadge" style="display:none"></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="sidebar-bottom">
+        <button class="nav-item" data-section="settings" style="width:100%;border-radius:8px;">
+            <span class="nav-icon">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="8" cy="8" r="2"/>
+                    <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/>
+                </svg>
+            </span>
+            <span>Ajustes</span>
+        </button>
+
+        <div class="sidebar-avatar" id="sidebarAvatar" style="margin-top:4px;">
+            <div class="avatar-circle" id="avatarInitial">?</div>
+            <div class="avatar-name" id="avatarName">Sin nombre</div>
+        </div>
+    </div>
+</aside>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MAIN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<main class="main">
+<div class="main-inner">
+
+    <!-- ── INICIO ── -->
+    <section id="section-home" class="section active">
+        <div class="page-header">
+            <div class="page-title" id="greetingTitle">Bienvenido a LEXA</div>
+            <div class="page-sub">Crea o retoma una sopa de letras</div>
+        </div>
+
+        <div class="stats-strip">
+            <div class="stat-pill">
+                <div class="stat-icon blue">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="1.5" width="12" height="13" rx="2"/>
+                        <path d="M5 5.5h6M5 8.5h6M5 11.5h4"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="stat-pill-val" id="statTotal">0</div>
+                    <div class="stat-pill-label">Sopas guardadas</div>
+                </div>
+            </div>
+            <div class="stat-pill">
+                <div class="stat-icon green">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 1L10 6h5l-4 3 1.5 5L8 11l-4.5 3L5 9 1 6h5z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="stat-pill-val" id="statWords">0</div>
+                    <div class="stat-pill-label">Palabras totales</div>
+                </div>
+            </div>
+            <div class="stat-pill">
+                <div class="stat-icon amber">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="8" cy="8" r="7"/>
+                        <path d="M8 4.5v4l2.5 2"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="stat-pill-val" id="statRecent">0</div>
+                    <div class="stat-pill-label">Editadas este mes</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-label">Crear nueva sopa</div>
+        <div class="difficulty-row" id="homeDiffCards"></div>
+
+        <div class="section-label">Recientes</div>
+        <div class="soups-list" id="homeRecents"></div>
+    </section>
+
+    <!-- ── MIS SOPAS ── -->
+    <section id="section-saved" class="section">
+        <div class="page-header">
+            <div class="page-title">Mis Sopas</div>
+            <div class="page-sub">Todas tus creaciones guardadas localmente</div>
+        </div>
+        <div class="soups-list" id="savedList"></div>
+    </section>
+
+    <!-- ── PAPELERA ── -->
+    <section id="section-trash" class="section">
+        <div class="page-header">
+            <div class="page-title">Papelera</div>
+            <div class="page-sub">Las sopas eliminadas se borran definitivamente pasados 7 días</div>
+        </div>
+        <div class="trash-notice">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="8" cy="8" r="7"/>
+                <path d="M8 5v4M8 11v.5"/>
+            </svg>
+            Las sopas en la papelera se eliminan permanentemente 7 días después de haberse borrado.
+            Puedes restaurarlas o eliminarlas antes de que expire el plazo.
+        </div>
+        <div class="soups-list" id="trashList"></div>
+    </section>
+
+    <!-- ── AJUSTES ── -->
+    <section id="section-settings" class="section">
+        <div class="page-header">
+            <div class="page-title">Ajustes</div>
+            <div class="page-sub">Personaliza tu experiencia con LEXA</div>
+        </div>
+        <div class="settings-grid">
+            <div class="settings-card">
+                <div class="settings-section">
+                    <div class="settings-section-title">Perfil</div>
+                    <div class="form-group">
+                        <label class="form-label" for="userNameInput">Tu nombre</label>
+                        <input type="text" class="form-input" id="userNameInput"
+                               placeholder="Escribe tu nombre..."
+                               autocomplete="off">
+                        <div class="form-hint">Se usa para personalizar el saludo en el inicio.</div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Almacenamiento</div>
+
+                    <div class="form-group">
+                        <div class="toggle-row">
+                            <div class="toggle-row-label">
+                                <div class="form-label" style="margin-bottom:3px;">Limpieza automática cada 30 días</div>
+                                <div class="form-hint" style="margin-top:0;">Las sopas sin editar se mueven a la papelera al abrir la app.</div>
+                            </div>
+                            <button class="toggle" id="autoCleanToggle" aria-label="Activar limpieza automática"></button>
+                        </div>
+                    </div>
+
+                    <div class="storage-bar-wrap">
+                        <div class="storage-bar-row">
+                            <span>Proyectos guardados</span>
+                            <span id="storageCount">0 / 100</span>
+                        </div>
+                        <div class="storage-bar-track">
+                            <div class="storage-bar-fill" id="storageBarFill" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Zona de peligro</div>
+                    <div class="form-group">
+                        <div class="form-label">Borrar todos los proyectos</div>
+                        <div class="form-hint" style="margin-bottom:12px;">
+                            Mueve todas las sopas a la papelera. Tendrás 7 días para recuperarlas.
+                        </div>
+                        <button class="btn btn-danger-soft" onclick="confirmMoveAllToTrash()">
+                            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="1,3 13,3"/>
+                                <path d="M11.5 3v9a1 1 0 01-1 1H3.5a1 1 0 01-1-1V3M4.5 3V2a1 1 0 011-1h3a1 1 0 011 1v1"/>
+                            </svg>
+                            Mover todo a la papelera
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div><!-- /main-inner -->
+</main>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOAST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-dot"></span>
+    <span id="toastMsg"></span>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MODAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+        <div class="modal-icon danger">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 3L17.5 17H2.5L10 3z"/>
+                <path d="M10 9v4M10 14.5v.5"/>
+            </svg>
+        </div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-desc"  id="modalDesc"></div>
+        <div class="modal-actions">
+            <button class="btn btn-ghost"   onclick="closeModal()">Cancelar</button>
+            <button class="btn btn-danger"  id="modalConfirmBtn">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CONSTANTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const DIFFS = [
+    {
+        id: 'easy', label: 'Fácil', rows: 10, cols: 10,
+        title: 'SOPA 10×10',
+        desc: 'Grilla pequeña, ideal para palabras cortas y principiantes.',
+        pCols: 5, pRows: 4,
+        fill: [1,3,5,8,11,14,16,18],
+    },
+    {
+        id: 'medium', label: 'Intermedio', rows: 15, cols: 15,
+        title: 'SOPA 15×15',
+        desc: 'Equilibrio perfecto entre espacio y desafío.',
+        pCols: 6, pRows: 5,
+        fill: [0,2,5,7,11,13,17,20,24,28],
+    },
+    {
+        id: 'hard', label: 'Avanzado', rows: 20, cols: 20,
+        title: 'SOPA 20×20',
+        desc: 'Grilla grande para muchas palabras y mayor dificultad.',
+        pCols: 7, pRows: 5,
+        fill: [1,3,6,9,12,15,18,21,25,27,30,33],
+    },
+    {
+        id: 'custom', label: 'Personalizado',
+        title: 'Personalizado',
+        desc: 'Define tú el tamaño, las palabras y la dificultad.',
+    }
+];
+
+const TRASH_TTL    = 7  * 24 * 60 * 60 * 1000;  // 7 días
+const INACTIVE_TTL = 30 * 24 * 60 * 60 * 1000;  // 30 días
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STORAGE HELPERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const getProjects  = () => { try { return JSON.parse(localStorage.getItem('lexa_projects') || '[]'); } catch { return []; } };
+const saveProjects = l  => localStorage.setItem('lexa_projects', JSON.stringify(l.slice(0, 100)));
+const getTrash     = () => { try { return JSON.parse(localStorage.getItem('lexa_trash')    || '[]'); } catch { return []; } };
+const saveTrash    = l  => localStorage.setItem('lexa_trash', JSON.stringify(l));
+const getAutoClean = () => localStorage.getItem('lexa_autoclean') !== 'off';
+const setAutoClean = v  => localStorage.setItem('lexa_autoclean', v ? 'on' : 'off');
+const getUserName  = () => localStorage.getItem('lexa_username') || '';
+const setUserName  = v  => localStorage.setItem('lexa_username', v.trim());
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STARTUP — limpieza y mantenimiento
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function startup() {
+    const now = Date.now();
+
+    // 1. Eliminar de papelera los que expiraron
+    const currentTrash = getTrash();
+    const validTrash   = currentTrash.filter(p => (now - (p.deletedAt || 0)) < TRASH_TTL);
+    if (validTrash.length !== currentTrash.length) saveTrash(validTrash);
+
+    // 2. Mover inactivos a papelera si auto-clean está activo
+    if (getAutoClean()) {
+        const projects = getProjects();
+        const active = [], moved = [];
+        projects.forEach(p => {
+            const ts = p.lastModified || p.createdAt || now;
+            ((now - ts) >= INACTIVE_TTL ? moved : active).push(p);
+        });
+        if (moved.length) {
+            saveProjects(active);
+            saveTrash([...getTrash(), ...moved.map(p => ({ ...p, deletedAt: now }))]);
+            const n = moved.length;
+            showToast(`${n} sopa${n > 1 ? 's' : ''} inactiva${n > 1 ? 's' : ''} movida${n > 1 ? 's' : ''} a la papelera`);
+        }
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   NAVEGACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function showSection(id) {
+    document.querySelectorAll('.section').forEach(s  => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('section-' + id).classList.add('active');
+    document.querySelector(`.nav-item[data-section="${id}"]`)?.classList.add('active');
+    // scroll to top
+    document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+    renderAll();
+}
+
+// Bind nav items
+document.querySelectorAll('.nav-item[data-section]').forEach(btn => {
+    btn.addEventListener('click', () => showSection(btn.dataset.section));
+});
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HELPERS — dificultad, fecha, thumb
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function getDiff(p) {
+    const id = p.difficulty || (() => {
+        const r = p.rows || parseInt((p.size || '0').split('×')[0]) || 0;
+        return r <= 10 ? 'easy' : r <= 15 ? 'medium' : 'hard';
+    })();
+    const labels = { easy: 'Fácil', medium: 'Intermedio', hard: 'Avanzado', custom: 'Personal' };
+    return { id, label: labels[id] || id };
+}
+
+function formatDate(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    const now = new Date();
+    const diffDays = Math.floor((now - d) / 86400000);
+    if (diffDays === 0) return 'Hoy';
+    if (diffDays === 1) return 'Ayer';
+    if (diffDays < 7)  return `Hace ${diffDays} días`;
+    return d.toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+/**
+ * Genera un thumbnail determinista basado en el _id del proyecto,
+ * no en su posición en el array.
+ */
+function buildSoupThumb(p, diffId) {
+    const n = { easy: 3, medium: 4, hard: 5, custom: 4 }[diffId] || 4;
+    const total = n * n;
+    // usa el _id como semilla, no el índice
+    const seed  = (p._id || '').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) || 42;
+    const colorClass = { easy: 'blue', medium: 'amber', hard: 'green', custom: 'blue' }[diffId] || 'blue';
+    let cells = '';
+    for (let i = 0; i < total; i++) {
+        // pseudo-random determinista basado en seed + posición
+        const filled = ((seed * (i + 1) * 2654435761) >>> 0) % 3 === 0;
+        cells += `<div class="soup-thumb-cell${filled ? ' ' + colorClass : ''}"></div>`;
+    }
+    return `<div class="soup-thumb-inner" style="grid-template-columns:repeat(${n},1fr)">${cells}</div>`;
+}
+
+function formatExpiry(deletedAt) {
+    const now = Date.now();
+    const remaining = TRASH_TTL - (now - (deletedAt || 0));
+
+    if (remaining <= 0) return { text: 'Expirado', cls: 'urgent' };
+
+    const hours = Math.ceil(remaining / (60 * 60 * 1000));
+    const days  = Math.floor(remaining / (24 * 60 * 60 * 1000));
+
+    if (hours <= 24) return { text: `Expira en ${hours}h`, cls: 'urgent' };
+    if (days <= 2)   return { text: `Expira en ${days} día${days !== 1 ? 's' : ''}`, cls: 'soon' };
+    return { text: `Expira en ${days} días`, cls: '' };
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DIFFICULTY CARDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function buildMiniGrid(cols, rows, fill) {
+    const total = cols * rows;
+    let cells = '';
+    for (let i = 0; i < total; i++) {
+        cells += `<div class="diff-grid-cell${fill.includes(i) ? ' filled' : ''}"></div>`;
+    }
+    return `<div class="diff-grid-preview"
+        style="grid-template-columns:repeat(${cols},1fr);width:${cols * 12}px;gap:3px">
+        ${cells}
+    </div>`;
+}
+
+function renderDiffCards(containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+
+    el.innerHTML = DIFFS.map(d => {
+        if (d.id === 'custom') {
+            return `
+            <div class="diff-card custom" onclick="launchCustom()" role="button" tabindex="0"
+                 onkeydown="if(event.key==='Enter')launchCustom()">
+                <div class="diff-header">
+                    <span class="diff-badge">Personalizado</span>
+                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+                        <circle cx="22" cy="22" r="20" stroke="#c4b5fd" stroke-width="2" stroke-dasharray="5 3"/>
+                        <path d="M22 13v18M13 22h18" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="diff-body">
+                    <div class="diff-title">${d.title}</div>
+                    <div class="diff-desc">${d.desc}</div>
+                    <div class="diff-size" style="color:#a78bfa;">Tamaño libre</div>
+                </div>
+                <div class="diff-cta">
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M2 6h8M6 2l4 4-4 4"/>
+                    </svg>
+                    Configurar manualmente
+                </div>
+            </div>`;
+        }
+
+        return `
+        <div class="diff-card ${d.id}" onclick="launchDifficulty('${d.id}')" role="button" tabindex="0"
+             onkeydown="if(event.key==='Enter')launchDifficulty('${d.id}')">
+            <div class="diff-header">
+                <span class="diff-badge">${d.label}</span>
+                ${buildMiniGrid(d.pCols, d.pRows, d.fill)}
+            </div>
+            <div class="diff-body">
+                <div class="diff-title">${d.title}</div>
+                <div class="diff-desc">${d.desc}</div>
+                <div class="diff-size">${d.rows} × ${d.cols} celdas</div>
+            </div>
+            <div class="diff-cta">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M2 6h8M6 2l4 4-4 4"/>
+                </svg>
+                Crear con esta dificultad
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function launchCustom() {
+    localStorage.setItem('lexa_launch', JSON.stringify({
+        type: 'template',
+        config: { rows: 15, cols: 15, title: 'SOPA PERSONALIZADA', difficulty: 'custom', custom: true }
+    }));
+    window.location.href = 'editor.html';
+}
+
+function launchDifficulty(id) {
+    const d = DIFFS.find(x => x.id === id);
+    if (!d) return;
+    localStorage.setItem('lexa_launch', JSON.stringify({
+        type: 'template',
+        config: { rows: d.rows, cols: d.cols, title: d.title, difficulty: d.id }
+    }));
+    window.location.href = 'editor.html';
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SOUPS LIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function renderSoupsList(containerId, limit) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+
+    const list  = getProjects();
+    const items = limit ? list.slice(0, limit) : list;
+
+    if (!items.length) {
+        el.innerHTML = `<div class="empty-state">
+            <svg class="empty-icon" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="7" y="4" width="30" height="36" rx="4"/>
+                <path d="M14 13h16M14 19h16M14 25h10"/>
+            </svg>
+            <div class="empty-title">Sin sopas guardadas</div>
+            <div class="empty-desc">Crea tu primera sopa seleccionando<br>una dificultad arriba.</div>
+        </div>`;
+        return;
+    }
+
+    el.innerHTML = items.map(p => {
+        const diff = getDiff(p);
+        const id   = p._id;      // ← usar _id, no índice
+        return `
+        <div class="soup-item" onclick="openProject('${id}')" data-id="${id}">
+            <div class="soup-thumb">${buildSoupThumb(p, diff.id)}</div>
+            <div class="soup-info">
+                <div class="soup-name">${escapeHtml(p.title || 'Sin título')}</div>
+                <div class="soup-meta">
+                    <span class="diff-tag ${diff.id}">${diff.label}</span>
+                    <span>${formatDate(p.lastModified || p.createdAt)}</span>
+                    <span>${p.size || '?×?'}</span>
+                    <span>${(p.placedWords || p.words || []).length} palabras</span>
+                </div>
+            </div>
+            <div class="soup-actions">
+                <button class="action-btn" title="Editar"
+                    onclick="event.stopPropagation(); openProject('${id}')">
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9.5 2.5L11.5 4.5L5 11H3V9L9.5 2.5z"/>
+                        <path d="M8 4l2 2"/>
+                    </svg>
+                </button>
+                <button class="action-btn danger" title="Mover a papelera"
+                    onclick="event.stopPropagation(); moveToTrash('${id}')">
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="1,3 13,3"/>
+                        <path d="M11 3v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3M4.5 3V2a1 1 0 011-1h3a1 1 0 011 1v1"/>
+                    </svg>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/**
+ * Abre un proyecto por su _id (no por índice).
+ */
+function openProject(id) {
+    const list    = getProjects();
+    const project = list.find(p => p._id === id);
+    if (!project) { showToast('No se pudo encontrar la sopa'); return; }
+    localStorage.setItem('lexa_launch', JSON.stringify({ type: 'project', data: project }));
+    window.location.href = 'editor.html';
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PAPELERA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function renderTrash() {
+    const el   = document.getElementById('trashList');
+    const list = getTrash();
+
+    // Badge
+    const badge = document.getElementById('trashBadge');
+    badge.style.display = list.length ? '' : 'none';
+    badge.textContent   = list.length;
+
+    if (!el) return;
+
+    if (!list.length) {
+        el.innerHTML = `<div class="empty-state">
+            <svg class="empty-icon" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="5,11 39,11"/>
+                <path d="M35 11V38a2 2 0 01-2 2H11a2 2 0 01-2-2V11M17 11V8a2 2 0 012-2h6a2 2 0 012 2v3"/>
+                <path d="M18 20v10M26 20v10"/>
+            </svg>
+            <div class="empty-title">La papelera está vacía</div>
+            <div class="empty-desc">Las sopas que elimines aparecerán aquí<br>durante 7 días antes de borrarse definitivamente.</div>
+        </div>`;
+        return;
+    }
+
+    el.innerHTML = list.map(p => {
+        const diff   = getDiff(p);
+        const expiry = formatExpiry(p.deletedAt);
+        const id     = p._id;   // ← usar _id, no índice
+        return `
+        <div class="trash-item" data-id="${id}">
+            <div class="soup-thumb">${buildSoupThumb(p, diff.id)}</div>
+            <div class="trash-info">
+                <div class="trash-name">${escapeHtml(p.title || 'Sin título')}</div>
+                <div class="trash-meta">
+                    <span class="diff-tag ${diff.id}">${diff.label}</span>
+                    <span>${p.size || '?×?'}</span>
+                    <span class="expires-tag ${expiry.cls}">${expiry.text}</span>
+                </div>
+            </div>
+            <div class="trash-actions">
+                <button class="btn-restore" onclick="restoreFromTrash('${id}')">
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1.5 7A5.5 5.5 0 1 0 3 3.5"/>
+                        <polyline points="1.5,1 1.5,4.5 5,4.5"/>
+                    </svg>
+                    Restaurar
+                </button>
+                <button class="btn-del-perm" onclick="confirmPermDelete('${id}')">
+                    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="1,3 13,3"/>
+                        <path d="M11 3v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3M4.5 3V2a1 1 0 011-1h3a1 1 0 011 1v1"/>
+                    </svg>
+                    Eliminar definitivamente
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/**
+ * Mover a papelera por _id, no por índice.
+ */
+function moveToTrash(id) {
+    const list    = getProjects();
+    const idx     = list.findIndex(p => p._id === id);
+    if (idx === -1) { showToast('Sopa no encontrada'); return; }
+    const [p]     = list.splice(idx, 1);
+    saveProjects(list);
+    saveTrash([{ ...p, deletedAt: Date.now() }, ...getTrash()]);
+    renderAll();
+    showToast(`"${p.title || 'Sin título'}" movida a la papelera`);
+}
+
+/**
+ * Restaurar de papelera por _id, no por índice.
+ */
+function restoreFromTrash(id) {
+    const trash = getTrash();
+    const idx   = trash.findIndex(p => p._id === id);
+    if (idx === -1) { showToast('Sopa no encontrada en la papelera'); return; }
+    const [p]   = trash.splice(idx, 1);
+    saveTrash(trash);
+    const { deletedAt, ...clean } = p;
+    clean.lastModified = Date.now();   // actualizar fecha al restaurar
+    saveProjects([clean, ...getProjects()]);
+    renderAll();
+    showToast(`"${clean.title || 'Sin título'}" restaurada`);
+}
+
+/**
+ * Confirmación de borrado permanente por _id, no por índice.
+ * El _id se captura en el closure; aunque el array cambie mientras
+ * el modal está abierto, se elimina el elemento correcto.
+ */
+function confirmPermDelete(id) {
+    const p = getTrash().find(x => x._id === id);
+    if (!p) { showToast('Sopa no encontrada'); return; }
+    openModal(
+        'Eliminar definitivamente',
+        `"${p.title || 'Sin título'}" se eliminará para siempre y no podrá recuperarse.`,
+        () => {
+            // re-leer papelera en el momento del confirm, buscar por _id
+            const current = getTrash().filter(x => x._id !== id);
+            saveTrash(current);
+            renderAll();
+            showToast('Sopa eliminada permanentemente');
+        }
+    );
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AJUSTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+// Guardar nombre con debounce (no en cada tecla)
+let _nameDebounce;
+document.getElementById('userNameInput').addEventListener('input', function() {
+    clearTimeout(_nameDebounce);
+    _nameDebounce = setTimeout(() => {
+        setUserName(this.value);
+        updateGreeting();
+        updateAvatarUI();
+    }, 400);
+});
+
+function updateGreeting() {
+    const name = getUserName();
+    const hour = new Date().getHours();
+    let greet  = 'Bienvenido a LEXA';
+    if (name) {
+        if (hour < 12)      greet = `Buenos días, ${name}`;
+        else if (hour < 19) greet = `Buenas tardes, ${name}`;
+        else                greet = `Buenas noches, ${name}`;
+    }
+    document.getElementById('greetingTitle').textContent = greet;
+    const inp = document.getElementById('userNameInput');
+    if (inp && inp !== document.activeElement) inp.value = name;
+}
+
+function updateAvatarUI() {
+    const name    = getUserName();
+    const initial = name ? name.charAt(0).toUpperCase() : '?';
+    document.getElementById('avatarInitial').textContent = initial;
+    document.getElementById('avatarName').textContent    = name || 'Sin nombre';
+}
+
+function updateToggleUI() {
+    const t = document.getElementById('autoCleanToggle');
+    if (t) t.classList.toggle('on', getAutoClean());
+}
+
+document.getElementById('autoCleanToggle').addEventListener('click', function() {
+    setAutoClean(!getAutoClean());
+    updateToggleUI();
+    showToast(getAutoClean() ? 'Limpieza automática activada' : 'Limpieza automática desactivada');
+});
+
+function confirmMoveAllToTrash() {
+    const list = getProjects();
+    if (!list.length) { showToast('No hay sopas guardadas'); return; }
+    openModal(
+        'Mover todo a la papelera',
+        `Se moverán ${list.length} sopa${list.length > 1 ? 's' : ''} a la papelera. Tendrás 7 días para recuperarlas antes de que se eliminen definitivamente.`,
+        () => {
+            const now = Date.now();
+            saveTrash([...list.map(p => ({ ...p, deletedAt: now })), ...getTrash()]);
+            saveProjects([]);
+            renderAll();
+            showToast('Todos los proyectos movidos a la papelera');
+        }
+    );
+}
+
+function updateStorageBar() {
+    const count = getProjects().length;
+    const max   = 100;
+    const pct   = Math.min(100, (count / max) * 100);
+    const el    = document.getElementById('storageBarFill');
+    const label = document.getElementById('storageCount');
+    if (el)    el.style.width = pct + '%';
+    if (label) label.textContent = `${count} / ${max}`;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STATS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function updateStats() {
+    const list  = getProjects();
+    const now   = Date.now();
+    const MONTH = 30 * 24 * 60 * 60 * 1000;
+
+    const totalWords   = list.reduce((acc, p) => acc + (p.placedWords || p.words || []).length, 0);
+    const recentCount  = list.filter(p => (now - (p.lastModified || p.createdAt || 0)) < MONTH).length;
+
+    document.getElementById('statTotal').textContent  = list.length;
+    document.getElementById('statWords').textContent  = totalWords;
+    document.getElementById('statRecent').textContent = recentCount;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MODAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function openModal(title, desc, onConfirm) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalDesc').textContent  = desc;
+    document.getElementById('modalConfirmBtn').onclick = () => { onConfirm(); closeModal(); };
+    document.getElementById('modalOverlay').classList.add('show');
+    // enfocar el botón de cancelar por accesibilidad
+    setTimeout(() => document.querySelector('#modalOverlay .btn-ghost')?.focus(), 220);
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// Cerrar modal al clic en el overlay (fuera del modal)
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+// Cerrar con Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+});
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOAST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+let _toastTimer;
+function showToast(msg) {
+    const t   = document.getElementById('toast');
+    const msg_el = document.getElementById('toastMsg');
+    msg_el.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SEGURIDAD — escape HTML
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RENDER ALL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function renderAll() {
+    renderDiffCards('homeDiffCards');
+    renderSoupsList('homeRecents', 5);
+    renderSoupsList('savedList');
+    renderTrash();
+    updateStats();
+    updateGreeting();
+    updateAvatarUI();
+    updateToggleUI();
+    updateStorageBar();
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INIT — dentro de DOMContentLoaded
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+document.addEventListener('DOMContentLoaded', () => {
+    startup();
+    renderAll();
+});
+</script>
+</body>
+</html>
