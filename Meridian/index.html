@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MERIDIAN — Hub de aprendizaje modular con repeticion espaciada y tecnicas de estudio activo.">
+  <title>MERIDIAN — Learning Hub</title>
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ============================================================
+       Cabecera global — fija en la parte superior
+       ============================================================ -->
+  <header class="app-header" role="banner">
+
+    <!-- Logotipo -->
+    <div class="logo" onclick="navigate('hub')" role="link" tabindex="0" aria-label="Ir al inicio">
+      <span class="logo-mark" aria-hidden="true">M</span>
+      <div class="logo-text">
+        <span class="logo-name">MERIDIAN</span>
+        <span class="logo-sub">Learning Hub</span>
+      </div>
+    </div>
+
+    <!-- Controles del header -->
+    <div class="header-right">
+
+      <!-- Racha de dias estudiados -->
+      <div class="streak-badge" title="Racha de estudio" aria-label="Racha de estudio">
+        <span class="streak-dot" aria-hidden="true"></span>
+        <span id="streakCount" aria-live="polite">0</span>
+        <span class="streak-label">dias</span>
+      </div>
+
+      <!-- Selector de tema — triple switch segmentado -->
+      <div class="theme-switch" id="themeSwitch" role="group" aria-label="Seleccionar tema de color">
+        <button class="theme-btn" data-theme-btn="light" aria-label="Modo claro" title="Claro">
+          <!-- Sol -->
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.5" fill="currentColor"/>
+            <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M19.07 4.93l-1.77 1.77M6.7 17.3l-1.77 1.77"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+
+        <button class="theme-btn" data-theme-btn="dim" aria-label="Modo templado" title="Templado">
+          <!-- Nube con estrellas -->
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 16.5a4.5 4.5 0 010-9c.2 0 .4 0 .6.02A5 5 0 0114.5 9a3.5 3.5 0 013.4 4.4A3 3 0 0117 19.5H6a2 2 0 01-2-3z"
+              fill="currentColor" opacity=".85"/>
+            <circle cx="6.5"  cy="4"  r="1" fill="currentColor"/>
+            <circle cx="12"   cy="2"  r="1" fill="currentColor"/>
+            <circle cx="18"   cy="5"  r="1" fill="currentColor"/>
+          </svg>
+        </button>
+
+        <button class="theme-btn" data-theme-btn="dark" aria-label="Modo oscuro" title="Oscuro">
+          <!-- Luna -->
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" fill="currentColor"/>
+          </svg>
+        </button>
+
+      </div>
+
+      <!-- Botón de ajustes -->
+      <button class="settings-btn" onclick="navigate('settings')"
+        aria-label="Configuración y backup" title="Configuración">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"
+            stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"
+            stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- ============================================================
+       Punto de montaje principal — las vistas se inyectan aqui
+       via JavaScript (app.js)
+
+       Vistas disponibles:
+         hub        — Menu principal con modulos de estudio
+         decks      — Gestor de mazos
+         deck-form  — Formulario para crear/editar mazo
+         cards      — Lista de tarjetas de un mazo
+         card-form  — Formulario para crear/editar tarjeta
+         study      — Modo de estudio (flashcard + SRS)
+       ============================================================ -->
+  <main id="appRoot" role="main" aria-live="polite"></main>
+
+  <!-- ============================================================
+       Scripts — orden de carga importa:
+         1. storage.js   — capa de datos y localStorage
+         2. srs-module.js — algoritmo SM-2 y vistas de estudio
+         3. app.js        — enrutador, hub y vistas de mazos
+       ============================================================ -->
+  <script src="js/storage.js"></script>
+  <script src="js/srs-module.js"></script>
+  <script src="js/feynman-module.js"></script>
+  <script src="js/cornell-module.js"></script>
+  <script src="js/pq4r-module.js"></script>
+  <script src="js/mindmap-module.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
