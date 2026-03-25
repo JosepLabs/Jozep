@@ -46,7 +46,7 @@ const CornellModule = (() => {
             Hub
           </button>
           <h1 class="view-title">Método Cornell</h1>
-          <span></span>
+          ${ModuleIO.headerBtns('CornellModule._export', 'CornellModule._import')}
         </div>
 
         <!-- Hero -->
@@ -264,7 +264,10 @@ const CornellModule = (() => {
             Cornell
           </button>
           <h1 class="view-title">Todas las notas</h1>
-          <button class="btn btn-primary btn-sm" onclick="CornellModule._newSheet()">+ Nueva</button>
+          <div class="mio-header-right">
+            ${ModuleIO.headerBtns('CornellModule._export', 'CornellModule._import')}
+            <button class="btn btn-primary btn-sm" onclick="CornellModule._newSheet()">+ Nueva</button>
+          </div>
         </div>
 
         ${sessions.length === 0
@@ -479,7 +482,36 @@ const CornellModule = (() => {
       .replace(/"/g, '&quot;');
   }
 
+  function _export() {
+    const sessions = Storage.getCornellSessions();
+    ModuleIO.download(
+      `meridian-cornell-${new Date().toISOString().slice(0,10)}.json`,
+      { type: 'meridian-cornell', version: 1, exportedAt: new Date().toISOString(), sessions }
+    );
+    showToast(`${sessions.length} nota${sessions.length !== 1 ? 's' : ''} exportada${sessions.length !== 1 ? 's' : ''}`, 'success');
+  }
+
+  function _import() {
+    ModuleIO.pickAndParse(data => {
+      if (data.type !== 'meridian-cornell' || !Array.isArray(data.sessions)) {
+        showToast('Archivo no es un backup de Cornell', 'error'); return;
+      }
+      const existing = Storage.getCornellSessions();
+      const merged   = ModuleIO.mergeById(existing, data.sessions);
+      const added    = merged.length - existing.length;
+      const state    = Storage.load();
+      if (!state.modules) state.modules = {};
+      if (!state.modules.cornell_notes) state.modules.cornell_notes = {};
+      state.modules.cornell_notes.sessions = merged;
+      Storage.save(state);
+      showToast(`${added} nota${added !== 1 ? 's' : ''} importada${added !== 1 ? 's' : ''}`, 'success');
+      const root = document.getElementById('appRoot');
+      if (AppState.currentView === 'cornell-list') renderList(root);
+      else renderHub(root);
+    });
+  }
+
   // ── Export ────────────────────────────────────────────────────
-  return { renderHub, render, renderList, _newSheet, _saveNow, _deleteSession };
+  return { renderHub, render, renderList, _newSheet, _saveNow, _deleteSession, _export, _import };
 
 })();

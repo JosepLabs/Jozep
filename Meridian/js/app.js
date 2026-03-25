@@ -255,9 +255,12 @@ function renderDeckManager(root) {
       <div class="view-header">
         <button class="btn-back" onclick="navigate('hub')">${Icons.back} Hub</button>
         <h2 class="view-title">Mis Mazos</h2>
-        <button class="btn btn-primary btn-sm" onclick="navigate('deck-form', { editingDeckId: null })">
-          + Nuevo Mazo
-        </button>
+        <div class="mio-header-right">
+          ${ModuleIO.headerBtns('FlashcardsIO.export', 'FlashcardsIO.import')}
+          <button class="btn btn-primary btn-sm" onclick="navigate('deck-form', { editingDeckId: null })">
+            + Nuevo Mazo
+          </button>
+        </div>
       </div>
 
       ${decks.length === 0 ? `
@@ -498,6 +501,99 @@ function updateStreakDisplay() {
   const el   = document.getElementById('streakCount');
   if (el) el.textContent = user.streak || 0;
 }
+
+
+// ================================================================
+// ModuleIO — Utilidad compartida de importación/exportación
+// ================================================================
+const ModuleIO = {
+
+  /** Descarga un objeto como archivo JSON */
+  download(filename, data) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  },
+
+  /** Abre el selector de archivos y devuelve el JSON parseado via callback */
+  pickAndParse(callback, errorCallback) {
+    const input = document.createElement('input');
+    input.type   = 'file';
+    input.accept = '.json,application/json';
+    input.style.display = 'none';
+    input.onchange = () => {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          callback(JSON.parse(e.target.result), file.name);
+        } catch {
+          (errorCallback || showToast)('Archivo JSON inválido', 'error');
+        }
+      };
+      reader.onerror = () => (errorCallback || showToast)('No se pudo leer el archivo', 'error');
+      reader.readAsText(file);
+      input.remove();
+    };
+    document.body.appendChild(input);
+    input.click();
+  },
+
+  /** Fusiona arrays evitando duplicados por id */
+  mergeById(existing, incoming) {
+    const ids = new Set(existing.map(x => x.id));
+    return [...existing, ...incoming.filter(x => !ids.has(x.id))];
+  },
+
+  /** Botones de exportar/importar para cabeceras de módulo */
+  headerBtns(exportFn, importFn) {
+    return `<div class="mio-btns">
+      <button class="mio-btn" onclick="${exportFn}()" title="Exportar datos de este módulo" aria-label="Exportar">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1v7M4.5 5.5L7 8l2.5-2.5M2 10.5v1a.5.5 0 00.5.5h9a.5.5 0 00.5-.5v-1"
+            stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="mio-btn" onclick="${importFn}()" title="Importar datos a este módulo" aria-label="Importar">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 9V2M4.5 4.5L7 2l2.5 2.5M2 10.5v1a.5.5 0 00.5.5h9a.5.5 0 00.5-.5v-1"
+            stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>`;
+  }
+};
+
+// ── Flashcards IO ─────────────────────────────────────────────
+const FlashcardsIO = {
+  export() {
+    const decks = Storage.getDecks();
+    ModuleIO.download(
+      `meridian-flashcards-${new Date().toISOString().slice(0,10)}.json`,
+      { type: 'meridian-flashcards', version: 1, exportedAt: new Date().toISOString(), decks }
+    );
+    showToast(`${decks.length} mazo${decks.length !== 1 ? 's' : ''} exportado${decks.length !== 1 ? 's' : ''}`, 'success');
+  },
+
+  import() {
+    ModuleIO.pickAndParse((data, name) => {
+      if (data.type !== 'meridian-flashcards' || !Array.isArray(data.decks)) {
+        showToast('Archivo no es un backup de Flashcards', 'error'); return;
+      }
+      const state   = Storage.load();
+      const merged  = ModuleIO.mergeById(state.decks, data.decks);
+      const added   = merged.length - state.decks.length;
+      state.decks   = merged;
+      Storage.save(state);
+      showToast(`${added} mazo${added !== 1 ? 's' : ''} importado${added !== 1 ? 's' : ''}`, 'success');
+      renderDeckManager(document.getElementById('appRoot'));
+    });
+  }
+};
 
 // ================================================================
 // DataEngine — Exportar / Importar / Smart Parse

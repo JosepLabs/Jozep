@@ -69,7 +69,7 @@ const FeynmanModule = (() => {
             Hub
           </button>
           <h1 class="view-title">Técnica Feynman</h1>
-          <span></span>
+          ${ModuleIO.headerBtns('FeynmanModule._export', 'FeynmanModule._import')}
         </div>
 
         <div class="feynman-hub-hero">
@@ -576,7 +576,10 @@ const FeynmanModule = (() => {
             Feynman
           </button>
           <h1 class="view-title">Historial de sesiones</h1>
-          <button class="btn btn-primary btn-sm" onclick="FeynmanModule._startNew()">+ Nueva</button>
+          <div class="mio-header-right">
+            ${ModuleIO.headerBtns('FeynmanModule._export', 'FeynmanModule._import')}
+            <button class="btn btn-primary btn-sm" onclick="FeynmanModule._startNew()">+ Nueva</button>
+          </div>
         </div>
 
         ${sessions.length === 0
@@ -653,12 +656,42 @@ const FeynmanModule = (() => {
       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  function _export() {
+    const sessions = Storage.getFeynmanSessions();
+    ModuleIO.download(
+      `meridian-feynman-${new Date().toISOString().slice(0,10)}.json`,
+      { type: 'meridian-feynman', version: 1, exportedAt: new Date().toISOString(), sessions }
+    );
+    showToast(`${sessions.length} sesión${sessions.length !== 1 ? 'es' : ''} exportada${sessions.length !== 1 ? 's' : ''}`, 'success');
+  }
+
+  function _import() {
+    ModuleIO.pickAndParse(data => {
+      if (data.type !== 'meridian-feynman' || !Array.isArray(data.sessions)) {
+        showToast('Archivo no es un backup de Feynman', 'error'); return;
+      }
+      const existing = Storage.getFeynmanSessions();
+      const merged   = ModuleIO.mergeById(existing, data.sessions);
+      const added    = merged.length - existing.length;
+      const state    = Storage.load();
+      if (!state.modules) state.modules = {};
+      if (!state.modules.feynman_technique) state.modules.feynman_technique = {};
+      state.modules.feynman_technique.sessions = merged;
+      Storage.save(state);
+      showToast(`${added} sesión${added !== 1 ? 'es' : ''} importada${added !== 1 ? 's' : ''}`, 'success');
+      const root = document.getElementById('appRoot');
+      if (AppState.currentView === 'feynman-list') _renderList(root);
+      else renderHub(root);
+    });
+  }
+
   // ── Export ──────────────────────────────────────
   return {
     render, renderHub,
     _startNew, _showList, _exitWizard,
     _prevStep, _nextStep,
-    _setEval, _saveSession
+    _setEval, _saveSession,
+    _export, _import
   };
 
 })();

@@ -67,9 +67,12 @@ const MindMapModule = (() => {
             Hub
           </button>
           <h1 class="view-title">Mapas Mentales</h1>
-          <button class="btn btn-primary btn-sm" onclick="MindMapModule._newMap()">
-            + Nuevo mapa
-          </button>
+          <div class="mio-header-right">
+            ${ModuleIO.headerBtns('MindMapModule._export', 'MindMapModule._import')}
+            <button class="btn btn-primary btn-sm" onclick="MindMapModule._newMap()">
+              + Nuevo mapa
+            </button>
+          </div>
         </div>
 
         ${maps.length === 0
@@ -688,12 +691,36 @@ const MindMapModule = (() => {
   // EXPORT
   // ══════════════════════════════════════════════════════════════
 
+  function _export() {
+    const maps = MindMapStorage.getMindMaps();
+    ModuleIO.download(
+      `meridian-mindmaps-${new Date().toISOString().slice(0,10)}.json`,
+      { type: 'meridian-mindmaps', version: 1, exportedAt: new Date().toISOString(), maps }
+    );
+    showToast(`${maps.length} mapa${maps.length !== 1 ? 's' : ''} exportado${maps.length !== 1 ? 's' : ''}`, 'success');
+  }
+
+  function _import() {
+    ModuleIO.pickAndParse(data => {
+      if (data.type !== 'meridian-mindmaps' || !Array.isArray(data.maps)) {
+        showToast('Archivo no es un backup de Mapas Mentales', 'error'); return;
+      }
+      const existing = MindMapStorage.getMindMaps();
+      const merged   = ModuleIO.mergeById(existing, data.maps);
+      const added    = merged.length - existing.length;
+      localStorage.setItem('meridian_v1_maps', JSON.stringify(merged));
+      showToast(`${added} mapa${added !== 1 ? 's' : ''} importado${added !== 1 ? 's' : ''}`, 'success');
+      renderHub(document.getElementById('appRoot'));
+    });
+  }
+
   return {
     render, renderHub,
     _newMap, _openMap, _exitEditor,
     _addRootNode, _addChildNode,
     _deleteSelected,
-    _saveNow
+    _saveNow,
+    _export, _import
   };
 
 })();

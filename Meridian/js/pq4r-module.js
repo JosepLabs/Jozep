@@ -116,7 +116,7 @@ const PQ4RModule = (() => {
             Hub
           </button>
           <h1 class="view-title">Método PQ4R</h1>
-          <span></span>
+          ${ModuleIO.headerBtns('PQ4RModule._export', 'PQ4RModule._import')}
         </div>
 
         <div class="pq4r-hub-hero">
@@ -585,7 +585,10 @@ const PQ4RModule = (() => {
             PQ4R
           </button>
           <h1 class="view-title">Sesiones PQ4R</h1>
-          <button class="btn btn-primary btn-sm" onclick="PQ4RModule._newSession()">+ Nueva</button>
+          <div class="mio-header-right">
+            ${ModuleIO.headerBtns('PQ4RModule._export', 'PQ4RModule._import')}
+            <button class="btn btn-primary btn-sm" onclick="PQ4RModule._newSession()">+ Nueva</button>
+          </div>
         </div>
 
         ${sessions.length === 0
@@ -893,8 +896,37 @@ const PQ4RModule = (() => {
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  function _export() {
+    const sessions = Storage.getPQ4RSessions();
+    ModuleIO.download(
+      `meridian-pq4r-${new Date().toISOString().slice(0,10)}.json`,
+      { type: 'meridian-pq4r', version: 1, exportedAt: new Date().toISOString(), sessions }
+    );
+    showToast(`${sessions.length} sesión${sessions.length !== 1 ? 'es' : ''} exportada${sessions.length !== 1 ? 's' : ''}`, 'success');
+  }
+
+  function _import() {
+    ModuleIO.pickAndParse(data => {
+      if (data.type !== 'meridian-pq4r' || !Array.isArray(data.sessions)) {
+        showToast('Archivo no es un backup de PQ4R', 'error'); return;
+      }
+      const existing = Storage.getPQ4RSessions();
+      const merged   = ModuleIO.mergeById(existing, data.sessions);
+      const added    = merged.length - existing.length;
+      const state    = Storage.load();
+      if (!state.modules) state.modules = {};
+      if (!state.modules.pq4r) state.modules.pq4r = {};
+      state.modules.pq4r.sessions = merged;
+      Storage.save(state);
+      showToast(`${added} sesión${added !== 1 ? 'es' : ''} importada${added !== 1 ? 's' : ''}`, 'success');
+      const root = document.getElementById('appRoot');
+      if (AppState.currentView === 'pq4r-list') renderList(root);
+      else renderHub(root);
+    });
+  }
+
   // ── Export ────────────────────────────────────────────────────
   return { renderHub, render, renderList, _newSession, _jumpTo, _advance,
-           _saveProgress, _completeSession, _exitWizard };
+           _saveProgress, _completeSession, _exitWizard, _export, _import };
 
 })();

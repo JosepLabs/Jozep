@@ -290,6 +290,41 @@ textarea, input { font-family: var(--font-body); }
 }
 [data-theme="light"] .settings-btn { border-color: var(--border-default); }
 
+/* ── Botones de exportar/importar por módulo ── */
+.mio-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.mio-btns {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mio-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  background: var(--bg-surface);
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  border-right: 1px solid var(--border-default);
+}
+.mio-btn:last-child { border-right: none; }
+.mio-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--accent);
+}
+.mio-btn:active { background: var(--accent-dim); }
+
 /* ----------------------------------------------------------------
    5. Layout
    ---------------------------------------------------------------- */

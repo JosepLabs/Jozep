@@ -1,0 +1,977 @@
+{
+  "type": "meridian-flashcards",
+  "version": 1,
+  "exportedAt": "2026-03-24T23:54:44.445Z",
+  "decks": [
+    {
+      "id": "vocab-ing-001",
+      "name": "Vocabulario Dr. Jekyll & Mr. Hyde",
+      "description": "Page 1",
+      "color": "#4F9CF9",
+      "createdAt": "2026-03-24T23:54:44.445Z",
+      "updatedAt": "2026-03-24T23:54:44.445Z",
+      "cards": [
+        {
+          "id": "vocab-001",
+          "front": "Rugged",
+          "back": "Rudo, resistente",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-002",
+          "front": "Countenance",
+          "back": "Semblante, rostro",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-003",
+          "front": "Scanty",
+          "back": "Escaso, limitado",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-004",
+          "front": "Discourse",
+          "back": "Discurso, conversación",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-005",
+          "front": "Backward",
+          "back": "Hacia atrás, atrasado",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-006",
+          "front": "Lean",
+          "back": "Delgado, apoyarse",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-007",
+          "front": "Dusty",
+          "back": "Polvoriento, empolvado",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-008",
+          "front": "Dreary",
+          "back": "Lúgubre, sombrío",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-009",
+          "front": "Yet",
+          "back": "Todavía, aún",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-010",
+          "front": "Somehow",
+          "back": "De alguna manera, de algún modo",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-011",
+          "front": "Lovable",
+          "back": "Amable, adorable",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-012",
+          "front": "Taste",
+          "back": "Gusto, sabor",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-013",
+          "front": "Eminently",
+          "back": "Eminentemente, sumamente",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-014",
+          "front": "Beaconed",
+          "back": "Brilló, guió",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-015",
+          "front": "Indeed",
+          "back": "De hecho, en efecto",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-016",
+          "front": "These",
+          "back": "Estos, estas",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-017",
+          "front": "After-dinner",
+          "back": "De sobremesa, tras la cena",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-018",
+          "front": "Loudly",
+          "back": "Ruidosamente, en voz alta",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-019",
+          "front": "Austere",
+          "back": "Austero, severo",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-020",
+          "front": "Gin",
+          "back": "Ginebra",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-021",
+          "front": "Mortify",
+          "back": "Mortificar, humillar",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-022",
+          "front": "Though",
+          "back": "Aunque, si bien",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-023",
+          "front": "Pressure",
+          "back": "Presión",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-024",
+          "front": "Involved",
+          "back": "Involucrado, complicado",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-025",
+          "front": "Misdeeds",
+          "back": "Fechorías, delitos",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-026",
+          "front": "Rather",
+          "back": "Más bien, bastante",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-027",
+          "front": "Reprove",
+          "back": "Reprender, reprochar",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-028",
+          "front": "Quaintly",
+          "back": "Curiosamente, pintorescamente",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-029",
+          "front": "Acquaintance",
+          "back": "Conocido, amistad",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-030",
+          "front": "Downgoing",
+          "back": "En decadencia, decadente",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-031",
+          "front": "Such",
+          "back": "Tal, semejante",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-032",
+          "front": "Chambers",
+          "back": "Aposentos, cámaras",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-033",
+          "front": "Demeanour",
+          "back": "Conducta, comportamiento",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-034",
+          "front": "Doubt",
+          "back": "Duda",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-035",
+          "front": "Feat",
+          "back": "Hazaña, proeza",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-036",
+          "front": "Undemonstrative",
+          "back": "Reservado, poco afectuoso",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-037",
+          "front": "Seemed",
+          "back": "Parecía, aparentaba",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-038",
+          "front": "Good-nature",
+          "back": "Bondad, buen carácter",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-039",
+          "front": "Ready-made",
+          "back": "Ya hecho, confeccionado",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-040",
+          "front": "Whom",
+          "back": "A quien, al cual",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-041",
+          "front": "Ivy",
+          "back": "Hiedra",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-042",
+          "front": "Growth",
+          "back": "Crecimiento, desarrollo",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-043",
+          "front": "Aptness",
+          "back": "Aptitud, idoneidad",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-044",
+          "front": "Kinsman",
+          "back": "Pariente, familiar",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-045",
+          "front": "Well-known",
+          "back": "Bien conocido, famoso",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-046",
+          "front": "Those",
+          "back": "Esos, aquellos",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-047",
+          "front": "Dull",
+          "back": "Aburrido, opaco",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-048",
+          "front": "Hail",
+          "back": "Saludar, aclamar",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-049",
+          "front": "Relief",
+          "back": "Alivio, socorro",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-050",
+          "front": "Chief",
+          "back": "Principal, jefe",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-051",
+          "front": "Thriving",
+          "back": "Próspero, floreciente",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-052",
+          "front": "Emulously",
+          "back": "Con emulación, competitivamente",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-053",
+          "front": "Hoping",
+          "back": "Esperando",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-054",
+          "front": "Still",
+          "back": "Todavía, quieto",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-055",
+          "front": "Laying",
+          "back": "Poniendo, colocando",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-056",
+          "front": "Surplus",
+          "back": "Excedente, sobra",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-057",
+          "front": "Grains",
+          "back": "Granos",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-058",
+          "front": "Coquetry",
+          "back": "Coquetería",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-059",
+          "front": "Thoroughfare",
+          "back": "Vía pública, calle principal",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        },
+        {
+          "id": "vocab-060",
+          "front": "Saleswomen",
+          "back": "Vendedoras",
+          "tags": ["vocabulary"],
+          "createdAt": "2026-03-24T23:54:44.445Z",
+          "srs": {
+            "interval": 0,
+            "repetitions": 0,
+            "easeFactor": 2.5,
+            "nextReviewDate": "2026-03-24T23:54:44.445Z",
+            "lastReviewDate": null,
+            "lapses": 0,
+            "state": "new"
+          }
+        }
+      ]
+    }
+  ]
+}
