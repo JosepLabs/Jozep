@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ICFESPrep — Saber 11°</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- HEADER FIJO -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-logo" id="header-logo" title="Volver al inicio" role="button" tabindex="0">
+        <span class="logo-emblem">🎓</span>
+        <span class="logo-text">ICFES<em>Prep</em></span>
+      </div>
+      <div class="header-center">
+        <div id="timer-display" class="timer-display" aria-live="polite" aria-label="Tiempo restante"></div>
+      </div>
+      <div class="header-right">
+        <!-- Feature 2: Botón Toggle Modo Claro/Oscuro -->
+        <button
+          id="btn-theme-toggle"
+          class="btn-theme-toggle"
+          aria-label="Alternar modo claro/oscuro"
+          title="Cambiar tema"
+        >
+          <span id="theme-icon" class="theme-icon">☀️</span>
+        </button>
+        <span class="header-tag">Saber 11° Colombia</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="app-main" role="main">
+    <div id="app" class="app-content"></div>
+  </main>
+
+  <!-- CARGA DE MÓDULOS ES6 -->
+  <script type="module" src="main.js"></script>
+</body>
+</html>
