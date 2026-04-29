@@ -554,6 +554,7 @@ export function iniciarSesion(modo, preguntas, materiaSeleccionada = null, esDia
   if (_state.timerInterval) clearInterval(_state.timerInterval);
 
   const SEGUNDOS_POR_PREGUNTA = 90;
+  const SIMULACRO_SEGUNDOS    = 7200; // 2 horas fijas para el simulacro
   const conTimer = (modo === 'simulacro' || modo === 'rutina');
 
   _state = {
@@ -562,7 +563,9 @@ export function iniciarSesion(modo, preguntas, materiaSeleccionada = null, esDia
     preguntas: [...preguntas],
     indicePreguntaActual: 0,
     respuestasUsuario: {},
-    tiempoRestante: conTimer ? preguntas.length * SEGUNDOS_POR_PREGUNTA : 0,
+    tiempoRestante: conTimer
+      ? (modo === 'simulacro' ? SIMULACRO_SEGUNDOS : preguntas.length * SEGUNDOS_POR_PREGUNTA)
+      : 0,
     timerInterval: null,
     sesionTerminada: false,
     resultados: null,

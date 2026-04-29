@@ -28,6 +28,8 @@ import {
   getNivelArea,
   setNivelArea,
   generarEntrenamientoFocalizado,
+  generarSimulacroCompleto,
+  getNivelDiagnostico,
 } from './stateManager.js';
 import {
   renderMenuPrincipal,
@@ -316,14 +318,22 @@ function iniciarEstudio(materia) {
 // =====================================================
 
 function iniciarSimulacro() {
-  const preguntas = _filtrarPorNivelActual(PREGUNTAS);
+  // Mapear nivel string → numérico para generarSimulacroCompleto
+  const nivelStr = getNivelDificultad();
+  const MAPA_NIVEL = { basico: 1, intermedio: 2, avanzado: 3 };
+  // 'automatico' usa el nivel diagnóstico guardado, o 2 (intermedio) como fallback
+  const nivelNum = MAPA_NIVEL[nivelStr] || getNivelDiagnostico() || 2;
+
+  // 60 preguntas: 12 por cada una de las 5 áreas, según el nivel del usuario
+  const preguntas = generarSimulacroCompleto(nivelNum);
 
   if (preguntas.length === 0) {
     _mostrarAlerta('No hay preguntas disponibles para el nivel seleccionado.');
     return;
   }
 
-  iniciarSesion('simulacro', _mezclarArray([...preguntas]), null);
+  // El timer siempre será 2 horas (7200 s), fijado en iniciarSesion
+  iniciarSesion('simulacro', preguntas, null);
   _iniciarTimer();
   _renderizarPreguntaActual();
 }
