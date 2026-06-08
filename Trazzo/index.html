@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trazzo</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+</head>
+<body>
+
+    <header class="app-header">
+        <h1 class="app-header__logo">Trazzo</h1>
+        
+        <div class="app-header__controls">
+            <label for="select-theme" class="visually-hidden">Tema visual:</label>
+            <select id="select-theme" class="theme-selector">
+                <option value="light">Claro</option>
+                <option value="dark">Oscuro</option>
+                <option value="nord">Nord</option>
+                <option value="purple">Morado</option>
+                <option value="dracula">Dracula</option>
+                <option value="muted-light">Atenuado</option>
+                <option value="vaporwave">Vaporwave</option>
+                <option value="coffee-shop">Coffee Shop</option>
+                <option value="matrix">Matrix</option>
+                <option value="miami-vice">Miami Vice</option>
+                <option value="sakura">Sakura</option>
+                <option value="ocean-abyss">Ocean Abyss</option>
+                <option value="gruvbox">Gruvbox</option>
+                <option value="synthwave84">SynthWave '84</option>
+            </select>
+        </div>
+    </header>
+
+    <main id="dashboard-view" class="view-container view-container--active">
+        <div class="dashboard-wrapper">
+            
+            <header class="dashboard-header">
+                <h2>Mis Proyectos</h2>
+                <div class="dashboard-actions">
+                    <button id="btn-new-project" class="btn btn--primary">Nuevo Proyecto</button>
+                    <label class="btn btn--secondary btn--file-upload">
+                        Importar JSON
+                        <input type="file" id="input-import" accept=".json" class="hidden-input">
+                    </label>
+                </div>
+            </header>
+
+            <section class="settings-section" id="companion-dashboard-settings">
+                <h3 class="settings-section__title">Configuración del Asistente Virtual</h3>
+                
+                <div class="control-toggle-group">
+                    <label class="ui-switch">
+                        <input type="checkbox" id="toggle-companion-dashboard" checked>
+                        <span class="ui-switch__slider"></span>
+                    </label>
+                    <span class="control-toggle-group__label">Habilitar compañero en el espacio de trabajo</span>
+                </div>
+
+                <div class="companion-uploader-box">
+                    <div class="field-group">
+                        <label for="input-avatar-calm" class="field-group__label">Estado 1 (Calmado):</label>
+                        <input type="file" id="input-avatar-calm" accept="image/*" class="field-group__file">
+                    </div>
+                    
+                    <div class="field-group">
+                        <label for="input-avatar-active" class="field-group__label">Estado 2 (Activo/Hablando):</label>
+                        <input type="file" id="input-avatar-active" accept="image/*" class="field-group__file">
+                    </div>
+                    
+                    <p class="field-group__hint">Se recomienda que la imagen tenga fondo transparente (.png)</p>
+                </div>
+            </section>
+
+            <div id="projects-container" class="projects-grid">
+                </div>
+            
+        </div>
+    </main>
+
+    <main id="editor-view" class="view-container" style="display: none;">
+        
+        <header class="editor-header">
+            <button id="btn-back" class="btn btn--ghost">← Volver al Dashboard</button>
+            <button id="btn-export" class="btn btn--outline">Exportar a JSON</button>
+        </header>
+
+        <div class="editor-layout">
+            <aside class="sidebar">
+                <div class="sidebar__section">
+                    <h4 class="sidebar__section-title">Herramientas</h4>
+                    <button id="tool-text" class="sidebar__btn">Texto</button>
+                    <button id="tool-sticky" class="sidebar__btn">Nota Adhesiva</button>
+                    <button id="tool-image" class="sidebar__btn">Imagen</button>
+                </div>
+
+                <div class="sidebar__section">
+                    <h4 class="sidebar__section-title">Frames</h4>
+                    <button id="tool-frame-mobile" class="sidebar__btn">Móvil (375px)</button>
+                    <button id="tool-frame-tablet" class="sidebar__btn">Tablet (768px)</button>
+                </div>
+
+                <div class="sidebar__section">
+                    <h4 class="sidebar__section-title">Acciones</h4>
+                    <button id="tool-connect" class="sidebar__btn sidebar__btn--action">Conectar Nodos</button>
+                    <button id="tool-delete" class="sidebar__btn sidebar__btn--danger">Eliminar Selección</button>
+                </div>
+
+                <div class="sidebar__section" id="sidebar-assistant-section">
+                    <h4 class="sidebar__section-title">Asistente</h4>
+                    <div class="sidebar__item sidebar__item--toggle">
+                        <label class="ui-switch">
+                            <input type="checkbox" id="toggle-companion-editor" checked>
+                            <span class="ui-switch__slider"></span>
+                        </label>
+                        <span class="sidebar__toggle-label">Mostrar Compañero</span>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="editor-canvas-wrapper">
+                <canvas id="canvas-element"></canvas>
+            </section>
+        </div>
+    </main>
+
+    <div id="companion-container" class="companion-floating-widget">
+        
+        <div id="companion-bubble" class="companion-floating-widget__bubble">
+            <p class="companion-floating-widget__text"></p>
+        </div>
+        
+        <div id="companion-avatar-trigger" class="companion-floating-widget__avatar">
+            <img id="companion-avatar-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%236366f1'/><path d='M18 28 h8 m12 0 h8' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/><path d='M24 44 q8 -2 16 0' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round'/></svg>" alt="Asistente Virtual" class="companion-floating-widget__image">
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

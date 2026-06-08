@@ -1,0 +1,800 @@
+/* TEMA 1: Claro */
+:root, [data-theme="light"] {
+    --bg-base: #f8fafc;
+    --bg-surface: #ffffff;
+    --border-color: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --accent-primary: #6366f1; /* Indigo */
+    --accent-hover: #4f46e5;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+    --companion-bg: #ffffff;
+    --companion-border: #cbd5e1;
+    --companion-text: #0f172a;
+    --companion-shadow: rgba(15, 23, 42, 0.08);
+}
+
+/* TEMA 2: Oscuro */
+[data-theme="dark"] {
+    --bg-base: #0f172a;
+    --bg-surface: #1e293b;
+    --border-color: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-primary: #818cf8;
+    --accent-hover: #6366f1;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+
+    --companion-bg: #1e293b;
+    --companion-border: #334155;
+    --companion-text: #f8fafc;
+    --companion-shadow: rgba(0, 0, 0, 0.4);
+}
+
+/* TEMA 3: Nord */
+[data-theme="nord"] {
+    --bg-base: #2e3440;
+    --bg-surface: #3b4252;
+    --border-color: #4c566a;
+    --text-primary: #eceff4;
+    --text-secondary: #d8dee9;
+    --accent-primary: #88c0d0;
+    --accent-hover: #8fbcbb;
+    --danger: #bf616a;
+    --danger-hover: #d08770;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+
+    --companion-bg: #2e3440;
+    --companion-border: #4c566a;
+    --companion-text: #d8dee9;
+    --companion-shadow: rgba(0, 0, 0, 0.25);
+}
+
+/* TEMA 4: Morado */
+[data-theme="purple"] {
+    --bg-base: #2e1065;
+    --bg-surface: #3b0764;
+    --border-color: #581c87;
+    --text-primary: #f5f3ff;
+    --text-secondary: #ddd6fe;
+    --accent-primary: #a855f7;
+    --accent-hover: #9333ea;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+
+    --companion-bg: #2e1065;
+    --companion-border: #581c87;
+    --companion-text: #f5f3ff;
+    --companion-shadow: rgba(76, 29, 149, 0.25);
+}
+
+/* TEMA 5: Dracula */
+[data-theme="dracula"] {
+    --bg-base: #1e1f29;
+    --bg-surface: #282a36;
+    --border-color: #44475a;
+    --text-primary: #f8f8f2;
+    --text-secondary: #6272a4;
+    --accent-primary: #ff79c6;
+    --accent-hover: #bd93f9;
+    --danger: #ff5555;
+    --danger-hover: #ff6e6e;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+
+    --companion-bg: #282a36;
+    --companion-border: #44475a;
+    --companion-text: #f8f8f2;
+    --companion-shadow: rgba(0, 0, 0, 0.4);
+}
+
+/* TEMA 6: Muted Light */
+[data-theme="muted-light"] {
+    --bg-base: #f4f1ea; /* Arena mate */
+    --bg-surface: #faf8f5; /* Crema suave */
+    --border-color: #e4dfd5;
+    --text-primary: #433f38;
+    --text-secondary: #8a8273;
+    --accent-primary: #7d9d9c; /* Muted teal */
+    --accent-hover: #577373;
+    --danger: #bc5a5a;
+    --danger-hover: #a34848;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.06);
+
+    --companion-bg: #faf8f5;
+    --companion-border: #e4dfd5;
+    --companion-text: #433f38;
+    --companion-shadow: rgba(0, 0, 0, 0.04);
+}
+
+/* TEMA 7: Vaporwave */
+[data-theme="vaporwave"] {
+    --bg-base: #240046;
+    --bg-surface: #3c096c;
+    --border-color: #7b2cbf;
+    --text-primary: #ffffff;
+    --text-secondary: #e0aaff;
+    --accent-primary: #ff007f; /* Rosa Neón */
+    --accent-hover: #00f0ff;   /* Azul Cian */
+    --danger: #ff5555;
+    --danger-hover: #ff3333;
+    --shadow-sm: 0 1px 2px rgba(255, 0, 127, 0.2);
+    --shadow-md: 0 4px 10px rgba(0, 240, 255, 0.3);
+
+    --companion-bg: #3c096c;
+    --companion-border: #7b2cbf;
+    --companion-text: #ffffff;
+    --companion-shadow: rgba(255, 0, 127, 0.25);
+}
+
+/* TEMA 8: Coffee Shop */
+[data-theme="coffee-shop"] {
+    --bg-base: #f5ebe0;
+    --bg-surface: #e3d5ca;
+    --border-color: #d5bdaf;
+    --text-primary: #4e3629;
+    --text-secondary: #7f5539;
+    --accent-primary: #b07d62;
+    --accent-hover: #9c6644;
+    --danger: #b05a54;
+    --danger-hover: #944742;
+    --shadow-sm: 0 1px 2px rgba(78, 54, 41, 0.05);
+    --shadow-md: 0 4px 6px rgba(78, 54, 41, 0.1);
+
+    --companion-bg: #e3d5ca;
+    --companion-border: #d5bdaf;
+    --companion-text: #4e3629;
+    --companion-shadow: rgba(78, 54, 41, 0.06);
+}
+
+/* TEMA 9: Matrix */
+[data-theme="matrix"] {
+    --bg-base: #000000;
+    --bg-surface: #0a0a0a;
+    --border-color: #02d302;
+    --text-primary: #03cf03;
+    --text-secondary: #008000;
+    --accent-primary: #01ce01;
+    --accent-hover: #28b828;
+    --danger: #ff0000;
+    --danger-hover: #cc0000;
+    --shadow-sm: 0 1px 2px rgba(0, 255, 0, 0.15);
+    --shadow-md: 0 4px 8px rgba(0, 255, 0, 0.3);
+
+    --companion-bg: #000000;
+    --companion-border: #02cc02;
+    --companion-text: #03cc03;
+    --companion-shadow: rgba(0, 255, 0, 0.25);
+}
+
+/* TEMA 10: Miami Vice */
+[data-theme="miami-vice"] {
+    --bg-base: #051329; /* Azul Marino Profundo */
+    --bg-surface: #0b2240;
+    --border-color: #1c4273;
+    --text-primary: #e2f1f7;
+    --text-secondary: #9dbed9;
+    --accent-primary: #ff007f; /* Rosa Fucsia */
+    --accent-hover: #00f5d4;   /* Turquesa Eléctrico */
+    --danger: #ff3366;
+    --danger-hover: #e60040;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(255, 0, 127, 0.25);
+
+    --companion-bg: #0b2240;
+    --companion-border: #1c4273;
+    --companion-text: #e2f1f7;
+    --companion-shadow: rgba(0, 245, 212, 0.15);
+}
+
+/* TEMA 11: Sakura */
+[data-theme="sakura"] {
+    --bg-base: #fff5f5; /* Rosa Pastel Pálido */
+    --bg-surface: #ffe3e3;
+    --border-color: #fcc2d7;
+    --text-primary: #495057; /* Gris Piedra */
+    --text-secondary: #868e96;
+    --accent-primary: #c2255c; /* Vino Tinto */
+    --accent-hover: #a61e4d;
+    --danger: #fa5252;
+    --danger-hover: #e03131;
+    --shadow-sm: 0 1px 2px rgba(194, 37, 92, 0.04);
+    --shadow-md: 0 4px 6px rgba(194, 37, 92, 0.08);
+
+    --companion-bg: #ffe3e3;
+    --companion-border: #fcc2d7;
+    --companion-text: #495057;
+    --companion-shadow: rgba(194, 37, 92, 0.06);
+}
+
+/* TEMA 12: Ocean Abyss */
+[data-theme="ocean-abyss"] {
+    --bg-base: #03071e; /* Azul Medianoche Profundo */
+    --bg-surface: #0a1128;
+    --border-color: #1c3144;
+    --text-primary: #e0f1f9;
+    --text-secondary: #8da9c4;
+    --accent-primary: #00b4d8; /* Azul Océano */
+    --accent-hover: #ff7f50;   /* Coral */
+    --danger: #d90429;
+    --danger-hover: #ef233c;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 8px rgba(0, 180, 216, 0.25);
+
+    --companion-bg: #0a1128;
+    --companion-border: #1c3144;
+    --companion-text: #e0f1f9;
+    --companion-shadow: rgba(0, 0, 0, 0.35);
+}
+
+/* TEMA 13: Gruvbox */
+[data-theme="gruvbox"] {
+    --bg-base: #282828; /* Gris Cálido Oscuro */
+    --bg-surface: #3c3836;
+    --border-color: #504945;
+    --text-primary: #fbf1c7;
+    --text-secondary: #bdae93;
+    --accent-primary: #fabd2f; /* Amarillo Mostaza */
+    --accent-hover: #fe8019;   /* Naranja Quemado */
+    --danger: #fb4934;
+    --danger-hover: #cc241d;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+
+    --companion-bg: #3c3836;
+    --companion-border: #504945;
+    --companion-text: #fbf1c7;
+    --companion-shadow: rgba(0, 0, 0, 0.3);
+}
+
+/* TEMA 14: SynthWave '84 */
+[data-theme="synthwave84"] {
+    --bg-base: #2b213a; /* Morado Profundo */
+    --bg-surface: #241a31;
+    --border-color: #4e3766;
+    --text-primary: #ffffff;
+    --text-secondary: #b3a3cc;
+    --accent-primary: #ff7edb; /* Rosa Fluorescente */
+    --accent-hover: #36ade2;   /* Azul Brillante */
+    --danger: #fe4450;
+    --danger-hover: #ff2a3b;
+    --shadow-sm: 0 1px 2px rgba(255, 126, 219, 0.15);
+    --shadow-md: 0 4px 12px rgba(255, 126, 219, 0.35);
+
+    --companion-bg: #241a31;
+    --companion-border: #4e3766;
+    --companion-text: #ffffff;
+    --companion-shadow: rgba(255, 126, 219, 0.25);
+}
+
+
+/* ====================================================================
+   2. RESET Y ESTILOS BASE
+   ==================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Utilidades */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.hidden-input {
+    display: none;
+}
+
+/* ====================================================================
+   3. CABECERA GLOBAL (Header)
+   ==================================================================== */
+.app-header {
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.app-header__logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    letter-spacing: -0.5px;
+}
+
+.theme-selector {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.theme-selector:focus {
+    border-color: var(--accent-primary);
+}
+
+/* ====================================================================
+   4. COMPONENTES COMUNES (Botones)
+   ==================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn--primary {
+    background-color: var(--accent-primary);
+    color: #ffffff;
+}
+
+.btn--primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn--secondary {
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn--secondary:hover {
+    background-color: var(--bg-base);
+    border-color: var(--text-secondary);
+}
+
+.btn--ghost {
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.btn--ghost:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-surface);
+}
+
+.btn--outline {
+    background: transparent;
+    border: 1px solid var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.btn--outline:hover {
+    background-color: var(--accent-primary);
+    color: #ffffff;
+}
+
+/* ====================================================================
+   5. CONTENEDORES DE VISTAS (SPA Logic)
+   ==================================================================== */
+.view-container {
+    flex: 1;
+    display: none; /* Oculto por defecto, JS lo cambia */
+}
+
+.view-container--active {
+    display: block;
+}
+
+/* ====================================================================
+   6. VISTA DASHBOARD
+   ==================================================================== */
+.dashboard-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.dashboard-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Grid de Proyectos */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.project-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-primary);
+}
+
+.project-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+}
+
+.project-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.project-date {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Panel de Configuración del Compañero */
+.settings-section {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.settings-section__title {
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+    color: var(--text-primary);
+}
+
+.companion-uploader-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 250px;
+}
+
+.field-group__label {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.field-group__file {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    border: 1px dashed var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    background-color: var(--bg-base);
+}
+
+.field-group__hint {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    width: 100%;
+}
+
+/* ====================================================================
+   7. INTERRUPTORES DE CONTROL (Toggle Switch UI)
+   ==================================================================== */
+.control-toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.control-toggle-group__label {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.ui-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.ui-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.ui-switch__slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--border-color);
+    transition: background-color 0.2s ease;
+    border-radius: 24px;
+}
+
+.ui-switch__slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.ui-switch input:checked + .ui-switch__slider {
+    background-color: var(--accent-primary);
+}
+
+.ui-switch input:checked + .ui-switch__slider::before {
+    transform: translateX(20px);
+}
+
+/* ====================================================================
+   8. VISTA EDITOR DE WIREFRAMES
+   ==================================================================== */
+#editor-view {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 65px); /* Resta la cabecera global */
+}
+
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.editor-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Barra Lateral (Sidebar) */
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-surface);
+    border-right: 1px solid var(--border-color);
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.sidebar__section-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.sidebar__btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar__btn:hover {
+    background-color: var(--bg-base);
+    border-color: var(--border-color);
+}
+
+.sidebar__btn--action {
+    background-color: rgba(99, 102, 241, 0.1);
+    color: var(--accent-primary);
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+.sidebar__btn--action:hover {
+    background-color: var(--accent-primary);
+    color: #ffffff;
+}
+
+.sidebar__btn--danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.sidebar__btn--danger:hover {
+    background-color: var(--danger);
+    color: #ffffff;
+}
+
+.sidebar__item--toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sidebar__toggle-label {
+    font-size: 0.875rem;
+}
+
+/* Canvas */
+.editor-canvas-wrapper {
+    flex: 1;
+    background-color: var(--bg-base);
+    position: relative;
+    overflow: hidden;
+}
+
+/* ====================================================================
+   9. COMPONENTE FLOTANTE GLOBAL (Asistente Virtual)
+   ==================================================================== */
+.companion-floating-widget {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    z-index: 9999;
+    pointer-events: none; /* Previene bloqueo de clics en áreas vacías */
+}
+
+.companion-floating-widget__avatar,
+.companion-floating-widget__bubble {
+    pointer-events: auto; /* Reactiva eventos solo en los elementos visuales */
+}
+
+/* Avatar interactivo */
+.companion-floating-widget__avatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background-color: var(--companion-bg);
+    border: 2px solid var(--companion-border);
+    box-shadow: 0 10px 15px -3px var(--companion-shadow);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                border-color 0.3s ease, 
+                background-color 0.3s ease;
+}
+
+.companion-floating-widget__avatar:hover {
+    transform: scale(1.08) translateY(-2px);
+}
+
+.companion-floating-widget__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Bocadillo de diálogo (Oculto y transicionado) */
+.companion-floating-widget__bubble {
+    display: block;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    pointer-events: none;
+    
+    position: relative;
+    background-color: var(--companion-bg);
+    border: 1px solid var(--companion-border);
+    color: var(--companion-text);
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    max-width: 260px;
+    box-shadow: 0 4px 12px var(--companion-shadow);
+    
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                background-color 0.3s ease, 
+                border-color 0.3s ease, 
+                color 0.3s ease;
+}
+
+/* Clase JS para inyectar la visualización */
+.companion-floating-widget__bubble--visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.companion-floating-widget__text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+/* Flecha del bocadillo */
+.companion-floating-widget__bubble::after, 
+.companion-floating-widget__bubble::before {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 24px;
+    border-width: 8px 8px 0;
+    border-style: solid;
+    border-color: var(--companion-bg) transparent;
+    display: block;
+    width: 0;
+}
+
+.companion-floating-widget__bubble::before {
+    bottom: -9px;
+    border-color: var(--companion-border) transparent;
+    z-index: -1;
+}
