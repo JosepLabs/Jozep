@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trazzo</title>
-    
+    <link rel="icon" href="favicon.png">
     <link rel="stylesheet" href="styles.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
@@ -12,7 +12,7 @@
 <body>
 
     <header class="app-header">
-        <h1 class="app-header__logo">Trazzo</h1>
+        <h1 class="app-header__logo"><img src="favicon.png" alt="Trazzo-Logo">Trazzo</h1>
         
         <div class="app-header__controls">
             <label for="select-theme" class="visually-hidden">Tema visual:</label>
@@ -20,7 +20,7 @@
                 <option value="light">Claro</option>
                 <option value="dark">Oscuro</option>
                 <option value="nord">Nord</option>
-                <option value="purple">Morado</option>
+                <option value="mint-rose">Kah's Theme</option>
                 <option value="dracula">Dracula</option>
                 <option value="muted-light">Atenuado</option>
                 <option value="vaporwave">Vaporwave</option>
@@ -36,48 +36,123 @@
     </header>
 
     <main id="dashboard-view" class="view-container view-container--active">
-        <div class="dashboard-wrapper">
-            
-            <header class="dashboard-header">
-                <h2>Mis Proyectos</h2>
-                <div class="dashboard-actions">
-                    <button id="btn-new-project" class="btn btn--primary">Nuevo Proyecto</button>
-                    <label class="btn btn--secondary btn--file-upload">
-                        Importar JSON
-                        <input type="file" id="input-import" accept=".json" class="hidden-input">
-                    </label>
-                </div>
-            </header>
+        <div class="dashboard-layout">
 
-            <section class="settings-section" id="companion-dashboard-settings">
-                <h3 class="settings-section__title">Configuración del Asistente Virtual</h3>
-                
-                <div class="control-toggle-group">
-                    <label class="ui-switch">
-                        <input type="checkbox" id="toggle-companion-dashboard" checked>
-                        <span class="ui-switch__slider"></span>
-                    </label>
-                    <span class="control-toggle-group__label">Habilitar compañero en el espacio de trabajo</span>
-                </div>
+            <!-- ── Sidebar lateral del Dashboard ── -->
+            <aside class="dashboard__sidebar">
+                <nav class="sidebar__nav" aria-label="Navegación principal">
+                    <span class="sidebar__nav-title">Espacio de trabajo</span>
 
-                <div class="companion-uploader-box">
-                    <div class="field-group">
-                        <label for="input-avatar-calm" class="field-group__label">Estado 1 (Calmado):</label>
-                        <input type="file" id="input-avatar-calm" accept="image/*" class="field-group__file">
+                    <a href="#" class="sidebar__link sidebar__link--active" id="nav-my-projects" data-section="my-projects" aria-current="page">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" class="sidebar__link-icon" aria-hidden="true">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Mis proyectos
+                    </a>
+
+                    <a href="#" class="sidebar__link" id="nav-assistant" data-section="assistant">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" class="sidebar__link-icon" aria-hidden="true">
+                            <circle cx="12" cy="8" r="5"/>
+                            <path d="M9 8h.01M15 8h.01"/>
+                            <path d="M9.5 11.5 Q12 13.5 14.5 11.5"/>
+                            <path d="M2 20c0-3.3 4-6 10-6s10 2.7 10 6"/>
+                        </svg>
+                        Asistente
+                    </a>
+
+                    <a href="#" class="sidebar__link" id="nav-trash" data-section="trash">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" class="sidebar__link-icon" aria-hidden="true">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                            <path d="M10 11v6M14 11v6"/>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                        Papelera
+                    </a>
+                </nav>
+
+                <div class="sidebar__footer">
+                    <div class="sidebar__footer-actions">
+                        <button id="btn-new-project-sidebar" class="sidebar__cta-btn" aria-label="Nuevo proyecto">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round" class="sidebar__link-icon" aria-hidden="true">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Nuevo proyecto
+                        </button>
                     </div>
-                    
-                    <div class="field-group">
-                        <label for="input-avatar-active" class="field-group__label">Estado 2 (Activo/Hablando):</label>
-                        <input type="file" id="input-avatar-active" accept="image/*" class="field-group__file">
-                    </div>
-                    
-                    <p class="field-group__hint">Se recomienda que la imagen tenga fondo transparente (.png)</p>
                 </div>
-            </section>
+            </aside>
 
-            <div id="projects-container" class="projects-grid">
+            <!-- ── Contenido principal del Dashboard ── -->
+            <div class="dashboard-wrapper">
+
+                <!-- ── Sección: Mis Proyectos ── -->
+                <div id="section-my-projects" class="dashboard-section">
+                    <header class="dashboard-header">
+                        <h2>Mis Proyectos</h2>
+                        <div class="dashboard-actions">
+                            <button id="btn-new-project" class="btn btn--primary">Nuevo Proyecto</button>
+                            <label class="btn btn--secondary btn--file-upload">
+                                Importar JSON
+                                <input type="file" id="input-import" accept=".json" class="hidden-input">
+                            </label>
+                        </div>
+                    </header>
+                    <div id="projects-container" class="projects-grid"></div>
                 </div>
-            
+
+                <!-- ── Sección: Asistente ── -->
+                <div id="section-assistant" class="dashboard-section" style="display:none;">
+                    <header class="dashboard-header">
+                        <h2>Asistente Virtual</h2>
+                    </header>
+
+                    <section class="settings-section">
+                        <h3 class="settings-section__title">Configuración del Asistente</h3>
+
+                        <div class="control-toggle-group">
+                            <label class="ui-switch">
+                                <input type="checkbox" id="toggle-companion-dashboard" checked>
+                                <span class="ui-switch__slider"></span>
+                            </label>
+                            <span class="control-toggle-group__label">Habilitar compañero en el espacio de trabajo</span>
+                        </div>
+
+                        <div class="companion-uploader-box">
+                            <div class="field-group">
+                                <label for="input-avatar-calm" class="field-group__label">Estado 1 (Calmado):</label>
+                                <input type="file" id="input-avatar-calm" accept="image/*" class="field-group__file">
+                            </div>
+
+                            <div class="field-group">
+                                <label for="input-avatar-active" class="field-group__label">Estado 2 (Activo/Hablando):</label>
+                                <input type="file" id="input-avatar-active" accept="image/*" class="field-group__file">
+                            </div>
+
+                            <p class="field-group__hint">Se recomienda que la imagen tenga fondo transparente (.png)</p>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ── Sección: Papelera ── -->
+                <div id="section-trash" class="dashboard-section" style="display:none;">
+                    <header class="dashboard-header">
+                        <h2>Eliminar Proyectos</h2>
+                    </header>
+                    <p class="trash-hint">Los proyectos eliminados no se pueden recuperar.</p>
+                    <div id="trash-container"></div>
+                </div>
+
+            </div>
         </div>
     </main>
 
@@ -95,12 +170,14 @@
                     <button id="tool-text" class="sidebar__btn">Texto</button>
                     <button id="tool-sticky" class="sidebar__btn">Nota Adhesiva</button>
                     <button id="tool-image" class="sidebar__btn">Imagen</button>
+                    <button id="tool-button" class="sidebar__btn sidebar__btn--ui-btn">Botón</button>
                 </div>
 
                 <div class="sidebar__section">
                     <h4 class="sidebar__section-title">Frames</h4>
                     <button id="tool-frame-mobile" class="sidebar__btn">Móvil (375px)</button>
                     <button id="tool-frame-tablet" class="sidebar__btn">Tablet (768px)</button>
+                    <button id="tool-nav-flow" class="sidebar__btn sidebar__btn--nav">Flujo de Nav.</button>
                 </div>
 
                 <div class="sidebar__section">

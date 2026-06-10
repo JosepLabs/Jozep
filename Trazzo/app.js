@@ -68,7 +68,7 @@ const frasesMotivacionales = [
 const StorageModule = {
     KEY: 'mi_spa_proyectos',
     /** Propiedades de Fabric.js que deben persistir para el grafo relacional */
-    CUSTOM_PROPERTIES: ['id', 'customType', 'fromId', 'toId', 'selectable', 'evented'],
+    CUSTOM_PROPERTIES: ['id', 'customType', 'fromId', 'toId', 'arrowId', 'selectable', 'evented'],
 
     save: (data) => {
         try {
@@ -110,11 +110,16 @@ const ProjectManager = {
 
         AppState.projects.push(newProject);
         StorageModule.save(AppState.projects);
-        UIController.renderDashboard();
+        UIController.navigateDashboardSection('my-projects');
     },
 
     getProjectById: (id) => {
         return AppState.projects.find(project => project.id === id);
+    },
+
+    deleteProject: (id) => {
+        AppState.projects = AppState.projects.filter(p => p.id !== id);
+        StorageModule.save(AppState.projects);
     },
 
     updateCurrentProjectCanvas: (jsonData) => {
@@ -135,7 +140,7 @@ const ProjectManager = {
         }
     },
 
-    /** Descarga el proyecto activo como archivo .json */
+    /* Descarga el proyecto activo como archivo .json */
     exportCurrentProject: () => {
         if (!AppState.currentProjectId) return;
         const project = ProjectManager.getProjectById(AppState.currentProjectId);
@@ -158,7 +163,7 @@ const ProjectManager = {
         URL.revokeObjectURL(anchor.href);
     },
 
-    /** Importa un proyecto desde un archivo .json validando su estructura */
+    /* Importa un proyecto desde un archivo .json validando su estructura */
     importProjectFile: (file) => {
         if (!file) return;
 
@@ -177,7 +182,7 @@ const ProjectManager = {
 
                 AppState.projects.push(imported);
                 StorageModule.save(AppState.projects);
-                UIController.renderDashboard();
+                UIController.navigateDashboardSection('my-projects');
                 alert('Proyecto importado exitosamente.');
             } catch (error) {
                 console.error('Error durante la importación:', error);
@@ -188,9 +193,7 @@ const ProjectManager = {
     }
 };
 
-/* ===================================================================
- * 4. MOTOR GRÁFICO — Canvas Manager (Fabric.js)
- * =================================================================== */
+/* 4. MOTOR GRÁFICO — Canvas Manager */
 
 const CanvasManager = {
 
@@ -238,11 +241,16 @@ const CanvasManager = {
             },
             'object:modified': triggerAutosave,
             'object:added':    triggerAutosave,
-            'object:removed':  triggerAutosave
+            'object:removed':  triggerAutosave,
+            'mouse:dblclick': (opt) => {
+                const target = opt.target;
+                if (!target || target.customType !== 'ui-button') return;
+                CanvasManager._enterButtonEditMode(target);
+            }
         });
     },
 
-    /** Recalcula la posición de las líneas de conexión al mover un nodo */
+    /* Recalcula la posición de las líneas de conexión al mover un nodo */
     updateNodeLines: (node) => {
         if (!node.connections) return;
         const center = node.getCenterPoint();
@@ -253,11 +261,20 @@ const CanvasManager = {
                 line.set({ x2: center.x, y2: center.y });
             }
             line.setCoords();
+
+            // Actualizar punta de flecha para flujos de navegación
+            if (line.arrowRef) {
+                const dx = line.x2 - line.x1;
+                const dy = line.y2 - line.y1;
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                line.arrowRef.set({ left: line.x2, top: line.y2, angle: angle + 90 });
+                line.arrowRef.setCoords();
+            }
         });
         AppState.canvasRef.renderAll();
     },
 
-    /** Libera referencias cruzadas en memoria antes de cambiar de proyecto */
+    /* Libera referencias cruzadas en memoria antes de cambiar de proyecto */
     clearCanvasReferences: () => {
         if (!AppState.canvasRef) return;
         AppState.canvasRef.getObjects().forEach(obj => {
@@ -265,6 +282,7 @@ const CanvasManager = {
                 obj.connections.forEach(line => {
                     line.objA = null;
                     line.objB = null;
+                    if (line.arrowRef) line.arrowRef = null;
                 });
                 obj.connections = null;
             }
@@ -273,7 +291,7 @@ const CanvasManager = {
         AppState.canvasRef.clear();
     },
 
-    /** Carga el canvas de un proyecto y rehidrata el grafo de conexiones */
+    /* Carga el canvas de un proyecto y rehidrata el grafo de conexiones */
     loadProjectData: (canvasData) => {
         if (!AppState.canvasRef) return;
         CanvasManager.clearCanvasReferences();
@@ -285,7 +303,7 @@ const CanvasManager = {
 
                 AppState.canvasRef.getObjects().forEach(obj => {
                     if (obj.id) objectsMap[obj.id] = obj;
-                    if (obj.customType === 'connection') lines.push(obj);
+                    if (obj.customType === 'connection' || obj.customType === 'nav-flow') lines.push(obj);
                 });
 
                 // Rehidratar referencias en memoria para conexiones persistidas
@@ -300,6 +318,12 @@ const CanvasManager = {
                         objA.connections.push(line);
                         objB.connections.push(line);
                     }
+
+                    // Rehidratar punta de flecha para flujos de navegación
+                    if (line.customType === 'nav-flow' && line.arrowId) {
+                        const arrowObj = objectsMap[line.arrowId];
+                        if (arrowObj) line.arrowRef = arrowObj;
+                    }
                 });
 
                 AppState.canvasRef.renderAll();
@@ -312,7 +336,7 @@ const CanvasManager = {
         }
     },
 
-    /* --- Herramientas de dibujo --- */
+    /* Herramientas de dibujo */
 
     addText: () => {
         const text = new fabric.IText('Doble clic para editar', {
@@ -362,7 +386,142 @@ const CanvasManager = {
         fileInput.click();
     },
 
-    /** Agrega un frame de pantalla (mobile o tablet) al canvas */
+    /* Agrega un botón UI al canvas — doble clic para editar el texto */
+    addButton: () => {
+        const btnRect = new fabric.Rect({
+            width: 140, height: 42,
+            fill: '#6366f1',
+            rx: 8, ry: 8,
+            originX: 'center', originY: 'center',
+            shadow: new fabric.Shadow({ color: 'rgba(99,102,241,0.40)', blur: 12, offsetX: 0, offsetY: 4 })
+        });
+        const btnLabel = new fabric.IText('Botón', {
+            fontSize: 14,
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontWeight: '600',
+            fill: '#ffffff',
+            originX: 'center', originY: 'center',
+            textAlign: 'center',
+            selectable: false,
+            evented: false
+        });
+        const buttonGroup = new fabric.Group([btnRect, btnLabel], {
+            left: 200, top: 200,
+            id: crypto.randomUUID(),
+            customType: 'ui-button'
+        });
+        AppState.canvasRef.add(buttonGroup).setActiveObject(buttonGroup);
+    },
+
+    /* Desagrupa un botón UI y activa la edición de su etiqueta */
+    _enterButtonEditMode: (buttonGroup) => {
+        const canvas = AppState.canvasRef;
+        if (!canvas) return;
+
+        const savedId = buttonGroup.id;
+        const items   = buttonGroup.getObjects().map(o => o);
+        const textItem = items.find(o => o.type === 'i-text');
+        if (!textItem) return;
+
+        // Restaurar cada objeto a sus coordenadas absolutas en el canvas
+        buttonGroup._restoreObjectsState();
+        canvas.remove(buttonGroup);
+
+        items.forEach(obj => {
+            obj.set({ selectable: true, evented: true });
+            canvas.add(obj);
+        });
+
+        // Iniciar edición de texto
+        canvas.setActiveObject(textItem);
+        textItem.enterEditing();
+        textItem.selectAll();
+        canvas.renderAll();
+
+        const regroup = () => {
+            textItem.off('editing:exited', regroup);
+            items.forEach(obj => canvas.remove(obj));
+
+            const newGroup = new fabric.Group(items, {
+                id: savedId,
+                customType: 'ui-button'
+            });
+            canvas.add(newGroup).setActiveObject(newGroup).renderAll();
+
+            const jsonData = canvas.toJSON(StorageModule.CUSTOM_PROPERTIES);
+            ProjectManager.updateCurrentProjectCanvas(jsonData);
+        };
+
+        textItem.on('editing:exited', regroup);
+    },
+
+    /* Conecta dos elementos seleccionados con una flecha de flujo de navegación */
+    connectNavFlow: () => {
+        const canvas = AppState.canvasRef;
+        const activeObjects = canvas.getActiveObjects();
+
+        if (activeObjects.length !== 2) {
+            alert('Selecciona exactamente dos elementos con Shift+Click para crear un flujo de navegación.');
+            return;
+        }
+
+        const [objA, objB] = activeObjects;
+        if (!objA.id) objA.id = crypto.randomUUID();
+        if (!objB.id) objB.id = crypto.randomUUID();
+
+        const centerA = objA.getCenterPoint();
+        const centerB = objB.getCenterPoint();
+
+        const lineId  = crypto.randomUUID();
+        const arrowId = crypto.randomUUID();
+
+        // Línea discontinua verde como eje del flujo
+        const line = new fabric.Line(
+            [centerA.x, centerA.y, centerB.x, centerB.y],
+            {
+                stroke: '#10b981', strokeWidth: 2.5,
+                strokeDashArray: [9, 5],
+                selectable: false, evented: false,
+                customType: 'nav-flow',
+                id: lineId,
+                fromId: objA.id, toId: objB.id,
+                arrowId: arrowId
+            }
+        );
+
+        // Triángulo direccional en el extremo de destino (objB)
+        const dx = centerB.x - centerA.x;
+        const dy = centerB.y - centerA.y;
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+        const arrow = new fabric.Triangle({
+            width: 14, height: 18,
+            fill: '#10b981',
+            left: centerB.x, top: centerB.y,
+            angle: angle + 90,
+            originX: 'center', originY: 'center',
+            selectable: false, evented: false,
+            customType: 'nav-arrow',
+            id: arrowId
+        });
+
+        line.objA     = objA;
+        line.objB     = objB;
+        line.arrowRef = arrow;
+
+        objA.connections = objA.connections || [];
+        objB.connections = objB.connections || [];
+        objA.connections.push(line);
+        objB.connections.push(line);
+
+        canvas.add(line).sendToBack(line).add(arrow)
+              .discardActiveObject().renderAll();
+
+        const jsonData = canvas.toJSON(StorageModule.CUSTOM_PROPERTIES);
+        ProjectManager.updateCurrentProjectCanvas(jsonData);
+    },
+
+    /* Agrega un frame de pantalla (mobile o tablet) al canvas */
     addFrame: (type) => {
         const width           = type === 'mobile' ? 375 : 768;
         const calculatedHeight = type === 'mobile' ? 812 : 1024;
@@ -394,7 +553,7 @@ const CanvasManager = {
             .renderAll();
     },
 
-    /** Conecta exactamente dos elementos seleccionados con una línea de flujo */
+    /* Conecta exactamente dos elementos seleccionados con una línea de flujo */
     connectSelectedElements: () => {
         const canvas = AppState.canvasRef;
         const activeObjects = canvas.getActiveObjects();
@@ -435,7 +594,7 @@ const CanvasManager = {
         ProjectManager.updateCurrentProjectCanvas(jsonData);
     },
 
-    /** Elimina los objetos seleccionados y sus líneas de conexión dependientes */
+    /* Elimina los objetos seleccionados y sus líneas de conexión dependientes */
     deleteSelection: () => {
         const canvas = AppState.canvasRef;
         if (!canvas) return;
@@ -449,6 +608,11 @@ const CanvasManager = {
                     if (other && other.connections) {
                         other.connections = other.connections.filter(l => l !== line);
                     }
+                    // Eliminar punta de flecha asociada (flujo de navegación)
+                    if (line.arrowRef) {
+                        canvas.remove(line.arrowRef);
+                        line.arrowRef = null;
+                    }
                     canvas.remove(line);
                 });
             }
@@ -459,9 +623,7 @@ const CanvasManager = {
     }
 };
 
-/* ===================================================================
- * 5. ASISTENTE VIRTUAL — Companion Manager
- * =================================================================== */
+/* Companion Manager */
 
 const CompanionManager = {
     STORAGE_KEYS: {
@@ -483,7 +645,7 @@ const CompanionManager = {
         CompanionManager.setAvatarState('calm');
     },
 
-    /** Muestra u oculta el widget y persiste la preferencia */
+    /* Muestra u oculta el widget y persiste la preferencia */
     setVisibility: (isVisible) => {
         AppState.companion.visible = isVisible;
         try {
@@ -494,7 +656,7 @@ const CompanionManager = {
         CompanionManager.syncDOMVisibility();
     },
 
-    /** Sincroniza el estado de visibilidad en el DOM y en los toggles de la UI */
+    /* Sincroniza el estado de visibilidad en el DOM y en los toggles de la UI */
     syncDOMVisibility: () => {
         const widget = document.getElementById('companion-container');
         if (!widget) return;
@@ -507,7 +669,7 @@ const CompanionManager = {
         if (toggleEditor)    toggleEditor.checked    = AppState.companion.visible;
     },
 
-    /** Cambia la imagen del avatar según el estado ('calm' | 'active') */
+    /* Cambia la imagen del avatar según el estado ('calm' | 'active') */
     setAvatarState: (state) => {
         const avatarImg = document.getElementById('companion-avatar-img');
         if (!avatarImg) return;
@@ -517,7 +679,6 @@ const CompanionManager = {
             : AppState.companion.calmSrc;
     },
 
-    /** Muestra el bocadillo con un texto fijo durante un tiempo determinado */
     triggerSpeechBubble: (text, durationMs = 4000) => {
         const bubble = document.getElementById('companion-bubble');
         if (!bubble) return;
@@ -537,7 +698,7 @@ const CompanionManager = {
         }, durationMs);
     },
 
-    /** Muestra el bocadillo con una frase motivacional aleatoria */
+    /* frase motivacional aleatoria */
     speakRandomPhrase: () => {
         const bubble = document.getElementById('companion-bubble');
         const bubbleText = bubble?.querySelector('.companion-floating-widget__text');
@@ -560,7 +721,6 @@ const CompanionManager = {
         }, delay);
     },
 
-    /** Procesa la imagen subida, la convierte a Base64 y la persiste */
     processAvatarUpload: async (file, type) => {
         if (!file) return;
 
@@ -603,18 +763,17 @@ const CompanionManager = {
     }
 };
 
-/* ===================================================================
- * 6. CONTROLADOR DE INTERFAZ — UI Controller
- * =================================================================== */
+/* Ui controller */
 
 const UIController = {
     elements: {
-        htmlRoot:          document.documentElement,
-        dashboardView:     document.getElementById('dashboard-view'),
-        editorView:        document.getElementById('editor-view'),
-        projectsContainer: document.getElementById('projects-container'),
-        btnNewProject:     document.getElementById('btn-new-project'),
-        btnBack:           document.getElementById('btn-back'),
+        htmlRoot:              document.documentElement,
+        dashboardView:         document.getElementById('dashboard-view'),
+        editorView:            document.getElementById('editor-view'),
+        projectsContainer:     document.getElementById('projects-container'),
+        btnNewProject:         document.getElementById('btn-new-project'),
+        btnNewProjectSidebar:  document.getElementById('btn-new-project-sidebar'),
+        btnBack:               document.getElementById('btn-back'),
 
         // I/O y temas
         btnExport:    document.getElementById('btn-export'),
@@ -625,14 +784,19 @@ const UIController = {
         btnToolText:    document.getElementById('tool-text'),
         btnToolSticky:  document.getElementById('tool-sticky'),
         btnToolImage:   document.getElementById('tool-image'),
+        btnToolButton:  document.getElementById('tool-button'),
         btnFrameMobile: document.getElementById('tool-frame-mobile'),
         btnFrameTablet: document.getElementById('tool-frame-tablet'),
+        btnNavFlow:     document.getElementById('tool-nav-flow'),
         btnConnect:     document.getElementById('tool-connect'),
         btnDelete:      document.getElementById('tool-delete')
     },
 
     init: () => {
         AppState.projects = StorageModule.load();
+        // Restaura el tema global persistido (elegido desde el dashboard)
+        const savedTheme = localStorage.getItem('trazzo_default_theme');
+        if (savedTheme) AppState.defaultTheme = savedTheme;
         CanvasManager.init('canvas-element');
         CompanionManager.init();
         UIController.bindEvents();
@@ -642,8 +806,17 @@ const UIController = {
     bindEvents: () => {
         const { elements: el } = UIController;
 
+        // Navegación entre secciones del dashboard
+        document.querySelectorAll('.sidebar__link[data-section]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                UIController.navigateDashboardSection(link.dataset.section);
+            });
+        });
+
         // Navegación
         el.btnNewProject?.addEventListener('click', ProjectManager.createProject);
+        el.btnNewProjectSidebar?.addEventListener('click', ProjectManager.createProject);
         el.btnBack?.addEventListener('click', UIController.showDashboard);
 
         // I/O de proyectos
@@ -660,8 +833,10 @@ const UIController = {
         el.btnToolText?.addEventListener('click', CanvasManager.addText);
         el.btnToolSticky?.addEventListener('click', CanvasManager.addStickyNote);
         el.btnToolImage?.addEventListener('click', CanvasManager.addImage);
+        el.btnToolButton?.addEventListener('click', CanvasManager.addButton);
         el.btnFrameMobile?.addEventListener('click', () => CanvasManager.addFrame('mobile'));
         el.btnFrameTablet?.addEventListener('click', () => CanvasManager.addFrame('tablet'));
+        el.btnNavFlow?.addEventListener('click', CanvasManager.connectNavFlow);
         el.btnConnect?.addEventListener('click', CanvasManager.connectSelectedElements);
         el.btnDelete?.addEventListener('click', CanvasManager.deleteSelection);
 
@@ -675,7 +850,6 @@ const UIController = {
             CompanionManager.speakRandomPhrase();
         });
 
-        // Atajo de teclado: Delete / Backspace para borrar objetos del canvas
         window.addEventListener('keydown', (e) => {
             if ((e.key === 'Delete' || e.key === 'Backspace') && AppState.canvasRef) {
                 const activeObj = AppState.canvasRef.getActiveObject();
@@ -685,16 +859,17 @@ const UIController = {
         });
     },
 
-    /** Aplica un tema visual cambiando el atributo data-theme en el <html> */
+
     applyTheme: (themeName) => {
         if (!themeName) return;
         UIController.elements.htmlRoot.setAttribute('data-theme', themeName);
         if (UIController.elements.selectTheme) {
             UIController.elements.selectTheme.value = themeName;
         }
-        if (AppState.currentProjectId) {
-            ProjectManager.updateProjectTheme(themeName);
-        }
+        // Persiste siempre como tema global, sin importar dónde se elija
+        AppState.defaultTheme = themeName;
+        try { localStorage.setItem('trazzo_default_theme', themeName); } catch (e) { /* noop */ }
+        // El tema ya no se guarda por proyecto; es siempre global
     },
 
     renderDashboard: () => {
@@ -726,7 +901,7 @@ const UIController = {
         if (!project) return;
 
         AppState.currentProjectId = projectId;
-        UIController.applyTheme(project.theme || AppState.defaultTheme);
+        UIController.applyTheme(AppState.defaultTheme); // Siempre aplica el tema global
 
         UIController.elements.dashboardView.style.display = 'none';
         UIController.elements.editorView.style.display = 'flex';
@@ -739,20 +914,87 @@ const UIController = {
         CompanionManager.syncDOMVisibility();
     },
 
+    navigateDashboardSection: (sectionId) => {
+        // Ocultar todas las secciones
+        document.querySelectorAll('.dashboard-section').forEach(s => {
+            s.style.display = 'none';
+        });
+        // Mostrar la sección solicitada
+        const target = document.getElementById(`section-${sectionId}`);
+        if (target) target.style.display = 'block';
+
+        // Actualizar estado activo en la navegación del sidebar
+        document.querySelectorAll('.sidebar__link[data-section]').forEach(link => {
+            link.classList.remove('sidebar__link--active');
+            link.removeAttribute('aria-current');
+        });
+        const activeLink = document.querySelector(`.sidebar__link[data-section="${sectionId}"]`);
+        if (activeLink) {
+            activeLink.classList.add('sidebar__link--active');
+            activeLink.setAttribute('aria-current', 'page');
+        }
+
+        // Renderizar contenido de la sección
+        if (sectionId === 'my-projects') UIController.renderDashboard();
+        if (sectionId === 'trash')       UIController.renderTrashView();
+    },
+
+    renderTrashView: () => {
+        const container = document.getElementById('trash-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (AppState.projects.length === 0) {
+            container.innerHTML = '<p class="empty-state">No hay proyectos para eliminar.</p>';
+            return;
+        }
+
+        const list = document.createElement('div');
+        list.className = 'trash-list';
+
+        AppState.projects.forEach(project => {
+            const item = document.createElement('div');
+            item.className = 'trash-item';
+            item.innerHTML = `
+                <div class="trash-item__info">
+                    <span class="trash-item__name">${project.name}</span>
+                    <small class="trash-item__date">Creado: ${new Date(project.createdAt).toLocaleDateString()}</small>
+                </div>
+                <button class="btn btn--danger trash-item__btn" aria-label="Eliminar ${project.name}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" width="14" height="14" aria-hidden="true">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        <path d="M10 11v6M14 11v6"/>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                    Eliminar
+                </button>
+            `;
+            item.querySelector('.trash-item__btn').addEventListener('click', () => {
+                if (confirm(`¿Eliminar el proyecto "${project.name}"?\n\nEsta acción no se puede deshacer.`)) {
+                    ProjectManager.deleteProject(project.id);
+                    UIController.renderTrashView();
+                }
+            });
+            list.appendChild(item);
+        });
+
+        container.appendChild(list);
+    },
+
     showDashboard: () => {
         CanvasManager.clearCanvasReferences();
         AppState.currentProjectId = null;
         UIController.applyTheme(AppState.defaultTheme);
 
-        UIController.elements.editorView.style.display = 'none';
-        UIController.elements.dashboardView.style.display = 'block';
-        UIController.renderDashboard();
+        UIController.elements.editorView.style.display  = 'none';
+        UIController.elements.dashboardView.style.display = 'flex';
+        UIController.navigateDashboardSection('my-projects');
 
         CompanionManager.syncDOMVisibility();
     }
 };
 
-/* ===================================================================
- * ARRANQUE DE LA APLICACIÓN
- * =================================================================== */
 document.addEventListener('DOMContentLoaded', UIController.init);
