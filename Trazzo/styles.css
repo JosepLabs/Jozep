@@ -54,12 +54,12 @@
 
     --companion-bg: #2e3440;
     --companion-border: #4c566a;
-    --companion-text: #d8dee9;
+    --companion-text: #000102;
     --companion-shadow: rgba(0, 0, 0, 0.25);
 }
 
-/* TEMA: Mint & Rose */
-[data-theme="mint-rose"] {
+/* TEMA: Kahn's Theme */
+[data-theme="kahn"] {
     --bg-base: #f1f7f3;
     --bg-surface: #ffffff;
     --border-color: #d1e4d6;
@@ -1046,4 +1046,144 @@ body {
 
 .trash-item__btn {
     flex-shrink: 0;
+}
+
+/* ====================================================================
+   MEJORAS: CABECERA DEL EDITOR CON HISTORIA Y ZOOM
+   ==================================================================== */
+
+/* Grupos izquierdo / derecho en la cabecera del editor */
+.editor-header__group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Controles de deshacer / rehacer */
+.editor-history-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+    padding-left: 0.625rem;
+    border-left: 1px solid var(--border-color);
+    margin-left: 0.125rem;
+}
+
+/* Botón compacto de icono (historia y zoom) */
+.editor-toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.editor-toolbar-btn:hover:not(:disabled) {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.editor-toolbar-btn:disabled {
+    opacity: 0.28;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Grupo de controles de zoom */
+.editor-zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    background-color: var(--bg-base);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.editor-zoom-controls .editor-toolbar-btn {
+    border: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+}
+
+.editor-zoom-controls .editor-toolbar-btn:hover:not(:disabled) {
+    background-color: var(--bg-surface);
+    border: none;
+}
+
+/* Porcentaje de zoom clicable */
+.editor-zoom-pill {
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0 0.4rem;
+    min-width: 42px;
+    height: 26px;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.editor-zoom-pill:hover {
+    background-color: var(--bg-surface);
+}
+
+/* ====================================================================
+   LISTA DE ATAJOS EN EL SIDEBAR DEL EDITOR
+   ==================================================================== */
+.sidebar__section--shortcuts {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.shortcut-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.shortcut-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+}
+
+kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 5px;
+    font-size: 0.65rem;
+    font-family: system-ui, sans-serif;
+    font-weight: 600;
+    background-color: var(--bg-base);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+    line-height: 1.5;
+    box-shadow: 0 1px 0 var(--border-color);
 }

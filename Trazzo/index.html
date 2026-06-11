@@ -6,21 +6,19 @@
     <title>Trazzo</title>
     <link rel="icon" href="favicon.png">
     <link rel="stylesheet" href="styles.css">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 </head>
 <body>
 
     <header class="app-header">
         <h1 class="app-header__logo"><img src="favicon.png" alt="Trazzo-Logo">Trazzo</h1>
-        
         <div class="app-header__controls">
             <label for="select-theme" class="visually-hidden">Tema visual:</label>
             <select id="select-theme" class="theme-selector">
                 <option value="light">Claro</option>
                 <option value="dark">Oscuro</option>
                 <option value="nord">Nord</option>
-                <option value="mint-rose">Kah's Theme</option>
+                <option value="kahn">Kah's Theme</option>
                 <option value="dracula">Dracula</option>
                 <option value="muted-light">Atenuado</option>
                 <option value="vaporwave">Vaporwave</option>
@@ -38,7 +36,6 @@
     <main id="dashboard-view" class="view-container view-container--active">
         <div class="dashboard-layout">
 
-            <!-- ── Sidebar lateral del Dashboard ── -->
             <aside class="dashboard__sidebar">
                 <nav class="sidebar__nav" aria-label="Navegación principal">
                     <span class="sidebar__nav-title">Espacio de trabajo</span>
@@ -92,10 +89,8 @@
                 </div>
             </aside>
 
-            <!-- ── Contenido principal del Dashboard ── -->
             <div class="dashboard-wrapper">
 
-                <!-- ── Sección: Mis Proyectos ── -->
                 <div id="section-my-projects" class="dashboard-section">
                     <header class="dashboard-header">
                         <h2>Mis Proyectos</h2>
@@ -110,15 +105,12 @@
                     <div id="projects-container" class="projects-grid"></div>
                 </div>
 
-                <!-- ── Sección: Asistente ── -->
                 <div id="section-assistant" class="dashboard-section" style="display:none;">
                     <header class="dashboard-header">
                         <h2>Asistente Virtual</h2>
                     </header>
-
                     <section class="settings-section">
                         <h3 class="settings-section__title">Configuración del Asistente</h3>
-
                         <div class="control-toggle-group">
                             <label class="ui-switch">
                                 <input type="checkbox" id="toggle-companion-dashboard" checked>
@@ -126,24 +118,20 @@
                             </label>
                             <span class="control-toggle-group__label">Habilitar compañero en el espacio de trabajo</span>
                         </div>
-
                         <div class="companion-uploader-box">
                             <div class="field-group">
                                 <label for="input-avatar-calm" class="field-group__label">Estado 1 (Calmado):</label>
                                 <input type="file" id="input-avatar-calm" accept="image/*" class="field-group__file">
                             </div>
-
                             <div class="field-group">
                                 <label for="input-avatar-active" class="field-group__label">Estado 2 (Activo/Hablando):</label>
                                 <input type="file" id="input-avatar-active" accept="image/*" class="field-group__file">
                             </div>
-
                             <p class="field-group__hint">Se recomienda que la imagen tenga fondo transparente (.png)</p>
                         </div>
                     </section>
                 </div>
 
-                <!-- ── Sección: Papelera ── -->
                 <div id="section-trash" class="dashboard-section" style="display:none;">
                     <header class="dashboard-header">
                         <h2>Eliminar Proyectos</h2>
@@ -157,10 +145,63 @@
     </main>
 
     <main id="editor-view" class="view-container" style="display: none;">
-        
+
+        <!-- ── Cabecera del editor con historia y zoom ── -->
         <header class="editor-header">
-            <button id="btn-back" class="btn btn--ghost">← Volver al Dashboard</button>
-            <button id="btn-export" class="btn btn--outline">Exportar a JSON</button>
+            <div class="editor-header__group">
+                <button id="btn-back" class="btn btn--ghost">← Volver</button>
+                <div class="editor-history-controls">
+                    <button id="btn-undo" class="editor-toolbar-btn" title="Deshacer (Ctrl+Z)" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                             stroke-linejoin="round" width="15" height="15" aria-hidden="true">
+                            <path d="M3 7v6h6"/>
+                            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+                        </svg>
+                    </button>
+                    <button id="btn-redo" class="editor-toolbar-btn" title="Rehacer (Ctrl+Shift+Z)" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                             stroke-linejoin="round" width="15" height="15" aria-hidden="true">
+                            <path d="M21 7v6h-6"/>
+                            <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="editor-header__group">
+                <div class="editor-zoom-controls">
+                    <button id="btn-zoom-out" class="editor-toolbar-btn" title="Alejar (Ctrl+−)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                             stroke-linejoin="round" width="14" height="14" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                        </svg>
+                    </button>
+                    <button id="btn-zoom-reset" class="editor-zoom-pill" title="Restablecer zoom (Ctrl+0)">100%</button>
+                    <button id="btn-zoom-in" class="editor-toolbar-btn" title="Acercar (Ctrl+=)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                             stroke-linejoin="round" width="14" height="14" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+                        </svg>
+                    </button>
+                </div>
+                <button id="btn-zoom-fit" class="editor-toolbar-btn" title="Ajustar todo al canvas (Ctrl+Shift+0)">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" width="15" height="15" aria-hidden="true">
+                        <polyline points="15 3 21 3 21 9"/>
+                        <polyline points="9 21 3 21 3 15"/>
+                        <line x1="21" y1="3" x2="14" y2="10"/>
+                        <line x1="3" y1="21" x2="10" y2="14"/>
+                    </svg>
+                </button>
+                <button id="btn-export" class="btn btn--outline">Exportar JSON</button>
+            </div>
         </header>
 
         <div class="editor-layout">
@@ -196,6 +237,18 @@
                         <span class="sidebar__toggle-label">Mostrar Compañero</span>
                     </div>
                 </div>
+
+                <div class="sidebar__section sidebar__section--shortcuts">
+                    <h4 class="sidebar__section-title">Atajos</h4>
+                    <ul class="shortcut-list">
+                        <li><kbd>Esp</kbd> + Arrastrar — Pan</li>
+                        <li><kbd>Ctrl</kbd> + Rueda — Zoom</li>
+                        <li><kbd>Ctrl+Z</kbd> — Deshacer</li>
+                        <li><kbd>Ctrl+C/V</kbd> — Copiar/Pegar</li>
+                        <li><kbd>Ctrl+A</kbd> — Seleccionar todo</li>
+                        <li><kbd>Supr</kbd> — Eliminar</li>
+                    </ul>
+                </div>
             </aside>
 
             <section class="editor-canvas-wrapper">
@@ -205,15 +258,12 @@
     </main>
 
     <div id="companion-container" class="companion-floating-widget">
-        
         <div id="companion-bubble" class="companion-floating-widget__bubble">
             <p class="companion-floating-widget__text"></p>
         </div>
-        
         <div id="companion-avatar-trigger" class="companion-floating-widget__avatar">
             <img id="companion-avatar-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='30' fill='%236366f1'/><path d='M18 28 h8 m12 0 h8' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/><path d='M24 44 q8 -2 16 0' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round'/></svg>" alt="Asistente Virtual" class="companion-floating-widget__image">
         </div>
-
     </div>
 
     <script src="app.js"></script>
