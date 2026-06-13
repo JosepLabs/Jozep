@@ -58,24 +58,23 @@
     --companion-shadow: rgba(0, 0, 0, 0.25);
 }
 
-/* TEMA: Kahn's Theme */
 [data-theme="kahn"] {
-    --bg-base: #f1f7f3;
-    --bg-surface: #ffffff;
-    --border-color: #d1e4d6;
-    --text-primary: #1c3325;    
-    --text-secondary: #42634f;
-    --accent-primary: #81c784;
-    --accent-hover: #66bb6a;
-    --danger: #e57373;          
-    --danger-hover: #ef5350;    
-    --shadow-sm: 0 1px 2px rgba(28, 51, 37, 0.05);
-    --shadow-md: 0 4px 6px rgba(28, 51, 37, 0.1);
+    --bg-base: #d2ebd9;
+    --bg-surface: #defae7;
+    --border-color: #2d7a41;
+    --text-primary: #0f2615;
+    --text-secondary: #3b6146;
+    --accent-primary: #f43f5e;
+    --accent-hover: #e11d48;   
+    --shadow-sm: 0 2px 4px rgba(15, 38, 21, 0.12);
+    --shadow-md: 0 6px 12px rgba(15, 38, 21, 0.18);
+    --danger: #ef4444;          
+    --danger-hover: #dc2626;    
 
-    --companion-bg: #fce4ec;
-    --companion-border: #f8bbd0;
-    --companion-text: #5c2d3a;
-    --companion-shadow: rgba(28, 51, 37, 0.06);
+    --companion-bg: #ffe4e6;
+    --companion-border: #f43f5e;
+    --companion-text: #4c0519;
+    --companion-shadow: rgba(244, 63, 94, 0.2);
 }
 
 /* TEMA 5: Dracula */
@@ -1187,3 +1186,287 @@ kbd {
     line-height: 1.5;
     box-shadow: 0 1px 0 var(--border-color);
 }
+
+
+/* ====================================================================
+   PANEL DE PROPIEDADES (derecha del editor)
+   ==================================================================== */
+
+.editor-properties-panel {
+    width: 228px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-surface);
+    border-left: 1px solid var(--border-color);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.prop-panel-header {
+    padding: 0.75rem 1rem 0.625rem;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.prop-panel-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-secondary);
+}
+
+/* Estado vacío */
+.prop-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    padding: 2rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Contenedor de campos */
+.prop-content {
+    flex-direction: column;
+    gap: 0;
+    padding-bottom: 1.5rem;
+}
+
+/* Sección de propiedades */
+.prop-section {
+    padding: 0.75rem 1rem 0.625rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.prop-section:last-child {
+    border-bottom: none;
+}
+
+.prop-section__title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-secondary);
+    margin-bottom: 0.625rem;
+}
+
+/* Cuadrícula 2 columnas para X/Y/W/H */
+.prop-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+}
+
+.prop-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.prop-field__label {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.prop-input {
+    width: 100%;
+    height: 28px;
+    padding: 0 0.5rem;
+    font-size: 0.78rem;
+    background-color: var(--bg-base);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-primary);
+    transition: border-color 0.15s ease;
+    box-sizing: border-box;
+    font-variant-numeric: tabular-nums;
+}
+
+.prop-input:focus {
+    outline: none;
+    border-color: var(--accent-primary, #6366f1);
+}
+
+/* Fila de propiedad genérica */
+.prop-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.prop-row:last-child { margin-bottom: 0; }
+
+/* Color swatch + hex */
+.prop-color-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.prop-color-swatch {
+    width: 28px;
+    height: 28px;
+    padding: 2px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.prop-hex {
+    font-size: 0.73rem;
+    font-family: 'Courier New', monospace;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Opacidad */
+.prop-opacity-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.prop-range {
+    flex: 1;
+    height: 4px;
+    accent-color: var(--accent-primary, #6366f1);
+    cursor: pointer;
+}
+
+.prop-opacity-val {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    min-width: 32px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Input con unidad (px) */
+.prop-input-unit {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.prop-unit {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* Select de fuente */
+.prop-select {
+    width: 100%;
+    height: 28px;
+    padding: 0 0.4rem;
+    font-size: 0.76rem;
+    background-color: var(--bg-base);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+/* Botones negrita / cursiva */
+.prop-row--format {
+    gap: 0.375rem;
+    justify-content: flex-start;
+}
+
+.prop-format-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+    background-color: var(--bg-base);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.prop-format-btn:hover {
+    background-color: var(--bg-surface);
+    border-color: var(--accent-primary, #6366f1);
+}
+
+.prop-format-btn--active {
+    background-color: var(--accent-primary, #6366f1);
+    border-color: var(--accent-primary, #6366f1);
+    color: #ffffff;
+}
+
+/* ====================================================================
+   HERRAMIENTAS DE ALINEACIÓN
+   ==================================================================== */
+
+.align-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.align-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-base);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 0.7rem;
+    gap: 0.25rem;
+    padding: 0 0.375rem;
+}
+
+.align-btn:hover {
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+    border-color: var(--accent-primary, #6366f1);
+}
+
+.align-distribute {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.3rem;
+}
+
+.align-btn--wide {
+    font-size: 0.69rem;
+    gap: 0.3rem;
+    padding: 0 0.5rem;
+}
+
+/* ====================================================================
+   SECCIÓN DE COMPONENTES EN EL SIDEBAR (indicador visual)
+   ==================================================================== */
+
+/* Distinguir componentes wireframe de las herramientas básicas */
+#tool-input-field::before { content: '▭ '; font-size: 0.7em; }
+#tool-navbar::before      { content: '▬ '; font-size: 0.7em; }
+#tool-card::before        { content: '▣ '; font-size: 0.7em; }
+#tool-checkbox::before    { content: '☑ '; font-size: 0.8em; }
