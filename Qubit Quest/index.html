@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101320">
+  <meta name="description" content="Qubit Quest: aprende física cuántica explorando experimentos, lecciones y mundos científicos.">
+  <title>Qubit Quest — El universo cuántico de Feynman</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Navegación principal">
+      <button class="brand" data-action="home" aria-label="Ir al menú principal">
+        <span class="brand-mark"><span>Q</span><i></i></span>
+        <span class="brand-copy"><strong>QUBIT QUEST</strong><small>EL UNIVERSO CUÁNTICO</small></span>
+      </button>
+      <div class="side-label">EXPLORAR</div>
+      <nav class="side-nav">
+        <button data-action="home" class="nav-item is-active"><span class="nav-icon">⌂</span> Inicio</button>
+        <button data-action="worlds" class="nav-item"><span class="nav-icon">◎</span> Mapa de mundos</button>
+        <button data-action="minigames" class="nav-item"><span class="nav-icon">⌁</span> Laboratorios</button>
+        <button data-action="notebook" class="nav-item"><span class="nav-icon">▤</span> Cuaderno</button>
+        <button data-action="glossary" class="nav-item"><span class="nav-icon">Aa</span> Glosario</button>
+        <button data-action="library" class="nav-item"><span class="nav-icon">⌘</span> Biblioteca científica</button>
+      </nav>
+      <div class="side-label side-label-lower">TU VIAJE</div>
+      <nav class="side-nav">
+        <button data-action="profile" class="nav-item"><span class="nav-icon">◉</span> Perfil y logros</button>
+        <button data-action="settings" class="nav-item"><span class="nav-icon">⚙</span> Configuración</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="tiny-orbit" aria-hidden="true"><span></span><i></i><b></b></div>
+        <p>El universo no está obligado a tener sentido para ti… pero podemos explorarlo.</p>
+        <small>Una aventura inspirada en la curiosidad de Richard Feynman.</small>
+      </div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar">
+        <button class="mobile-menu" data-action="toggle-sidebar" aria-label="Abrir navegación">☰</button>
+        <div class="breadcrumb" id="breadcrumb"><span class="breadcrumb-muted">Qubit Quest</span><span class="breadcrumb-slash">/</span><strong>Inicio</strong></div>
+        <div class="topbar-right">
+          <span class="save-indicator"><i></i> Guardado local</span>
+          <div class="xp-chip"><span class="xp-star">✦</span><strong id="top-xp">0 XP</strong></div>
+          <button class="top-avatar" data-action="profile" aria-label="Abrir perfil">J</button>
+        </div>
+      </header>
+      <main id="screen" class="screen" tabindex="-1"></main>
+      <footer class="app-footer"><span>QUBIT QUEST <span class="footer-dot">•</span> FASE 4</span><span>Aprende preguntando. Avanza experimentando.</span></footer>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><div class="noscript">Qubit Quest necesita JavaScript activado para ejecutar las lecciones y simulaciones.</div></noscript>
+</body>
+</html>
